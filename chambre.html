@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Équipe de la chambre</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1 id="title"></h1>
+  <div id="team" class="team-grid"></div>
+  <a class="link" href="index.html">Retour</a>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const num = params.get("num");
+    document.getElementById("title").textContent = `Chambre ${num}`;
+
+    const teamDiv = document.getElementById("team");
+    const data = JSON.parse(localStorage.getItem("profiles") || "[]")
+      .filter(p => p.chambre == num);
+
+    if (data.length === 0) {
+      teamDiv.innerHTML = "<p>Aucun soignant assigné.</p>";
+    } else {
+      data.forEach(p => {
+        teamDiv.innerHTML += `
+          <div class="card">
+            <img src="${p.photo}" alt="Photo de ${p.nom}">
+            <p>${p.nom}</p>
+            <small>${p.description}</small>
+          </div>
+        `;
+      });
+    }
+  </script>
+</body>
+</html>
