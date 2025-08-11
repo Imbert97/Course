@@ -1,20 +1,43 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Accueil - Présentation équipe</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urgence Pédiatrique - Équipe Soignante</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h1>Choisissez une chambre</h1>
-  <div class="grid">
-    <!-- Boutons chambres -->
-    <script>
-      for (let i = 1; i <= 10; i++) {
-        document.write(`<a class="room-btn" href="chambre.html?num=${i}">Chambre ${i}</a>`);
-      }
-    </script>
-  </div>
-  <a class="link" href="gestion.html">Gestion des soignants</a>
+    <header>
+        <div class="container">
+            <h1>🏥 Urgence Pédiatrique</h1>
+            <p class="subtitle">Rencontrez l'équipe qui prend soin de votre enfant</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="intro-section">
+            <h2>Sélectionnez la chambre de votre enfant</h2>
+            <p>Découvrez les professionnels dévoués qui s'occupent de votre enfant aujourd'hui.</p>
+        </div>
+
+        <div class="chambres-grid" id="chambresGrid">
+            <!-- Les boutons seront générés par JavaScript -->
+        </div>
+
+        <div class="admin-section">
+            <a href="gestion.html" class="admin-link">
+                ⚙️ Gestion des équipes (Personnel uniquement)
+            </a>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Service d'Urgence Pédiatrique - Votre enfant entre de bonnes mains</p>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
 </body>
 </html>
