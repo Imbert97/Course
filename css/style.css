@@ -233,6 +233,28 @@ main {
     border-color: #3498db;
 }
 
+/* Styling pour l'input file */
+.form-group input[type="file"] {
+    padding: 0.8rem;
+    border: 2px dashed #3498db;
+    border-radius: 8px;
+    background: rgba(52, 152, 219, 0.05);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-group input[type="file"]:hover {
+    border-color: #2980b9;
+    background: rgba(52, 152, 219, 0.1);
+}
+
+.photo-preview {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
 button {
     background: linear-gradient(145deg, #3498db, #2980b9);
     color: white;
