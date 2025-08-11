@@ -1,43 +1,852 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Urgence Pédiatrique - Équipe Soignante</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Urgences Pédiatriques - Gestion des équipes par chambre</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+  :root {
+    --color-bg: #fff7f0;
+    --color-primary: #f4a261;
+    --color-primary-light: #fcdcbf;
+    --color-secondary: #e76f51;
+    --color-text-dark: #3e2f1c;
+    --color-text-muted: #7a6851;
+    --color-card-bg: #fff3e0;
+    --color-overlay-bg: rgba(255, 244, 224, 0.95);
+    --radius: 16px;
+    --shadow: 0 10px 25px rgba(231,111,81,0.15);
+    font-family: 'Inter', sans-serif;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0; padding: 0;
+    background: var(--color-bg);
+    color: var(--color-text-dark);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-size: 16px;
+  }
+  h1 {
+    text-align: center;
+    margin: 1rem 0 1.5rem;
+    color: var(--color-secondary);
+  }
+  main {
+    flex: 1;
+    max-width: 960px;
+    margin: 0 auto 3rem;
+    padding: 0 1rem;
+  }
+
+  /* Boutons gestion */
+  .action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1.75rem;
+  }
+  button.action-btn {
+    background: var(--color-primary);
+    border: none;
+    padding: 0.65rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: var(--radius);
+    cursor: pointer;
+    color: white;
+    box-shadow: var(--shadow);
+    transition: background 0.3s ease;
+  }
+  button.action-btn:hover {
+    background: var(--color-secondary);
+  }
+
+  .rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 1.25rem;
+  }
+  .room-card {
+    background: var(--color-card-bg);
+    border-radius: var(--radius);
+    padding: 1.5rem 1rem;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.3rem;
+    color: var(--color-secondary);
+    user-select: none;
+  }
+  .room-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 40px rgba(231,111,81,0.25);
+  }
+  .room-card.free {
+    background: #f9f5f0;
+    color: var(--color-text-muted);
+    cursor: default;
+    box-shadow: none;
+    font-weight: 400;
+    font-style: italic;
+  }
+  .room-card.free:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Overlay full screen panel */
+  .overlay {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: var(--color-overlay-bg);
+    backdrop-filter: blur(6px);
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1rem 2rem;
+    overflow-y: auto;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(40px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    z-index: 1000;
+  }
+  .overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  .overlay header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  .overlay header h2 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.7rem;
+    color: var(--color-secondary);
+  }
+  .overlay header button.close-btn {
+    font-size: 1.5rem;
+    background: var(--color-secondary);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: background 0.3s ease;
+  }
+  .overlay header button.close-btn:hover {
+    background: #d65c43;
+  }
+
+  /* Profil équipe dans overlay chambre */
+  .team-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+  }
+  .team-card {
+    background: var(--color-card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    max-width: 280px;
+    padding: 1.5rem 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.3s ease;
+  }
+  .team-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 50px rgba(231,111,81,0.3);
+  }
+  .team-photo {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(231,111,81,0.25);
+    margin-bottom: 1rem;
+  }
+  .team-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .team-name {
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin: 0 0 0.25rem;
+    text-align: center;
+  }
+  .team-role {
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--color-secondary);
+    margin: 0 0 0.75rem;
+    text-align: center;
+  }
+  .team-bio {
+    font-size: 0.9rem;
+    color: var(--color-text-dark);
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  .team-bullets {
+    list-style-type: disc;
+    padding-left: 1.2rem;
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    max-width: 250px;
+  }
+
+  /* Formulaires profils et assignation */
+  form {
+    max-width: 400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  label {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  input[type="text"], textarea, select {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    resize: vertical;
+  }
+  textarea {
+    min-height: 60px;
+  }
+  button[type="submit"] {
+    background: var(--color-primary);
+    border: none;
+    padding: 0.65rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: var(--radius);
+    cursor: pointer;
+    color: white;
+    box-shadow: var(--shadow);
+    transition: background 0.3s ease;
+  }
+  button[type="submit"]:hover {
+    background: var(--color-secondary);
+  }
+
+  /* Liste profils modifiable */
+  .profile-list {
+    max-width: 600px;
+    margin: 0 auto 2rem;
+  }
+  .profile-item {
+    background: var(--color-card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .profile-photo-small {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .profile-photo-small img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .profile-info {
+    flex-grow: 1;
+  }
+  .profile-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .profile-actions button {
+    background: var(--color-secondary);
+    border: none;
+    padding: 0.35rem 0.7rem;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background 0.3s ease;
+  }
+  .profile-actions button:hover {
+    background: #d65c43;
+  }
+
+  /* Assignation chambres */
+  .assign-chambre-list {
+    max-width: 700px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .assign-chambre-item {
+    background: var(--color-card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .assign-chambre-item label {
+    flex: 0 0 130px;
+    font-weight: 700;
+    color: var(--color-secondary);
+  }
+  .assign-chambre-item select {
+    flex-grow: 1;
+    min-width: 200px;
+    height: 36px;
+    border-radius: 8px;
+  }
+  .multi-select {
+    height: 80px;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px){
+    .team-cards {
+      flex-direction: column;
+      align-items: center;
+    }
+    .team-card {
+      max-width: 100%;
+      width: 320px;
+    }
+    .rooms-grid {
+      grid-template-columns: repeat(2,1fr);
+      grid-template-rows: auto;
+    }
+    .room-card {
+      font-size: 1.1rem;
+      padding: 1.25rem 1rem;
+    }
+    .assign-chambre-item {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .assign-chambre-item label {
+      flex: none;
+      margin-bottom: 0.5rem;
+    }
+    .assign-chambre-item select {
+      width: 100%;
+    }
+  }
+
+  footer {
+    text-align: center;
+    padding: 1rem 0 2rem;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+</style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>🏥 Urgence Pédiatrique</h1>
-            <p class="subtitle">Rencontrez l'équipe qui prend soin de votre enfant</p>
-        </div>
-    </header>
 
-    <main class="container">
-        <div class="intro-section">
-            <h2>Sélectionnez la chambre de votre enfant</h2>
-            <p>Découvrez les professionnels dévoués qui s'occupent de votre enfant aujourd'hui.</p>
-        </div>
+<h1>Urgences Pédiatriques - Gestion des équipes par chambre</h1>
 
-        <div class="chambres-grid" id="chambresGrid">
-            <!-- Les boutons seront générés par JavaScript -->
-        </div>
+<div class="action-buttons">
+  <button id="btnManageProfiles" class="action-btn" aria-haspopup="dialog" aria-controls="profileManagerOverlay">Modifier les profils</button>
+  <button id="btnManageAssign" class="action-btn" aria-haspopup="dialog" aria-controls="assignManagerOverlay">Modifier l'assignation des chambres</button>
+</div>
 
-        <div class="admin-section">
-            <a href="gestion.html" class="admin-link">
-                ⚙️ Gestion des équipes (Personnel uniquement)
-            </a>
-        </div>
-    </main>
+<main>
+  <div class="rooms-grid" id="roomsGrid" aria-label="Liste des chambres">
+    <!-- Cases insérées par JS -->
+  </div>
+</main>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2025 Service d'Urgence Pédiatrique - Votre enfant entre de bonnes mains</p>
-        </div>
-    </footer>
+<!-- Overlay consultation chambre -->
+<div id="profileOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="overlayTitle" tabindex="-1">
+  <header>
+    <h2 id="overlayTitle">Chambre 1</h2>
+    <button class="close-btn" aria-label="Fermer la fiche">&times;</button>
+  </header>
+  <div class="team-cards" id="teamCards">
+    <!-- Profils injectés par JS -->
+  </div>
+</div>
 
-    <script src="js/script.js"></script>
+<!-- Overlay gestion profils -->
+<div id="profileManagerOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="profileManagerTitle" tabindex="-1" aria-hidden="true" >
+  <header>
+    <h2 id="profileManagerTitle">Gestion des profils</h2>
+    <button class="close-btn" aria-label="Fermer la gestion des profils">&times;</button>
+  </header>
+  <section class="profile-list" id="profileList">
+    <!-- Liste des profils -->
+  </section>
+  <section>
+    <h3>Ajouter / Modifier un profil</h3>
+    <form id="profileForm" aria-label="Formulaire de profil">
+      <input type="hidden" id="profileIndex" />
+      <label for="profileName">Nom complet</label>
+      <input type="text" id="profileName" required />
+      <label for="profileRole">Rôle</label>
+      <input type="text" id="profileRole" required />
+      <label for="profilePhoto">URL Photo (facultatif)</label>
+      <input type="text" id="profilePhoto" placeholder="https://..." />
+      <label for="profileBio">Présentation courte</label>
+      <textarea id="profileBio" required></textarea>
+      <label for="profileBullets">Points clés (une idée par ligne)</label>
+      <textarea id="profileBullets" placeholder="Ex: Passionné par la musique classique"></textarea>
+      <button type="submit">Enregistrer</button>
+    </form>
+  </section>
+</div>
+
+<!-- Overlay gestion assignation -->
+<div id="assignManagerOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="assignManagerTitle" tabindex="-1" aria-hidden="true" >
+  <header>
+    <h2 id="assignManagerTitle">Gestion de l'assignation des chambres</h2>
+    <button class="close-btn" aria-label="Fermer la gestion de l'assignation">&times;</button>
+  </header>
+  <form id="assignForm" aria-label="Formulaire d'assignation">
+    <div class="assign-chambre-list" id="assignList">
+      <!-- Champs assignation chambre -->
+    </div>
+    <button type="submit" style="margin: 1.5rem auto 0; display: block;">Enregistrer l'assignation</button>
+  </form>
+</div>
+
+<footer>
+  <small>Ce site est une démo pour faciliter la présentation des équipes aux familles. <br>Les données sont fictives et locales.</small>
+</footer>
+
+<script>
+  // Données initiales profils
+  let profiles = [
+    {
+      name: "Dr. Marie Dupont",
+      role: "Médecin urgentiste",
+      photo: "https://i.pravatar.cc/150?img=12",
+      bio: "Expérience en pédiatrie, approche calme et rassurante.",
+      bullets: [
+        "Spécialiste des urgences pédiatriques depuis 10 ans",
+        "Passionnée par la musique classique",
+        "Engagée dans le bien-être des enfants"
+      ]
+    },
+    {
+      name: "Infirmier Paul Martin",
+      role: "Infirmier",
+      photo: "https://i.pravatar.cc/150?img=5",
+      bio: "Soins attentifs et expert des voies respiratoires.",
+      bullets: [
+        "10 ans d'expérience en soins intensifs pédiatriques",
+        "Fan de randonnée et nature",
+        "Très à l'écoute des familles"
+      ]
+    },
+    {
+      name: "Infirmière Anaïs Leroy",
+      role: "Infirmière d'unité",
+      photo: "https://i.pravatar.cc/150?img=15",
+      bio: "Accompagnement des familles et gestion des traitements.",
+      bullets: [
+        "Diplômée en soins pédiatriques",
+        "Aime le yoga et la méditation",
+        "Soutien moral important pour les enfants"
+      ]
+    },
+    {
+      name: "Dr. Louis Bernard",
+      role: "Pédiatre",
+      photo: "https://i.pravatar.cc/150?img=20",
+      bio: "Approche douce et expertise médicale pointue.",
+      bullets: [
+        "Spécialiste en maladies infantiles rares",
+        "Amateur de peinture",
+        "Volontaire dans des ONG médicales"
+      ]
+    },
+    {
+      name: "Auxiliaire Sophie Morel",
+      role: "Auxiliaire de puériculture",
+      photo: "https://i.pravatar.cc/150?img=25",
+      bio: "Soutien constant et bienveillant auprès des enfants.",
+      bullets: [
+        "Formation en petite enfance",
+        "Passionnée par la lecture jeunesse",
+        "Créative dans l'animation d'activités"
+      ]
+    },
+    {
+      name: "Dr. Camille Lefèvre",
+      role: "Médecin urgentiste",
+      photo: "https://i.pravatar.cc/150?img=30",
+      bio: "Réactive et expérimentée en situations critiques.",
+      bullets: [
+        "Plus de 8 ans aux urgences pédiatriques",
+        "Aime la photographie",
+        "Grande patience et empathie"
+      ]
+    },
+    {
+      name: "Infirmier Julien Roche",
+      role: "Infirmier",
+      photo: "https://i.pravatar.cc/150?img=35",
+      bio: "Spécialiste en soins post-opératoires.",
+      bullets: [
+        "Expert en gestion de la douleur",
+        "Passionné de cyclisme",
+        "Soutient les familles en période difficile"
+      ]
+    },
+    {
+      name: "Infirmière Claire Fontaine",
+      role: "Infirmière d'unité",
+      photo: "https://i.pravatar.cc/150?img=40",
+      bio: "Organisation et douceur dans les soins quotidiens.",
+      bullets: [
+        "Expérience de 7 ans en pédiatrie",
+        "Amatrice de jardinage",
+        "Toujours souriante et rassurante"
+      ]
+    },
+    {
+      name: "Dr. Antoine Petit",
+      role: "Pédiatre",
+      photo: "https://i.pravatar.cc/150?img=45",
+      bio: "Compétent et attentif aux besoins spécifiques.",
+      bullets: [
+        "Recherche médicale active en pédiatrie",
+        "Fan de course à pied",
+        "Très proche des enfants hospitalisés"
+      ]
+    },
+    {
+      name: "Auxiliaire Emma Dubois",
+      role: "Auxiliaire de puériculture",
+      photo: "https://i.pravatar.cc/150?img=50",
+      bio: "Soutien doux et présence rassurante.",
+      bullets: [
+        "Formation spécialisée en puériculture",
+        "Aime les activités manuelles",
+        "Très à l’écoute des besoins des enfants"
+      ]
+    }
+  ];
+
+  const chambresCount = 10;
+  const totalCases = 25;
+
+  // Assignation chambre -> tableau indices profils (3 par chambre)
+  // Par défaut : 3 profils aléatoires par chambre
+  let assignments = [];
+  function resetAssignments() {
+    assignments = [];
+    for(let i=0; i<chambresCount; i++) {
+      assignments[i] = getRandomIndices(3, profiles.length);
+    }
+  }
+  resetAssignments();
+
+  // DOM elements
+  const roomsGrid = document.getElementById('roomsGrid');
+  const profileOverlay = document.getElementById('profileOverlay');
+  const overlayTitle = document.getElementById('overlayTitle');
+  const teamCards = document.getElementById('teamCards');
+  const closeProfileBtn = profileOverlay.querySelector('.close-btn');
+
+  const btnManageProfiles = document.getElementById('btnManageProfiles');
+  const btnManageAssign = document.getElementById('btnManageAssign');
+
+  const profileManagerOverlay = document.getElementById('profileManagerOverlay');
+  const assignManagerOverlay = document.getElementById('assignManagerOverlay');
+
+  // Profile management elements
+  const profileList = document.getElementById('profileList');
+  const profileForm = document.getElementById('profileForm');
+  const profileIndexInput = document.getElementById('profileIndex');
+  const profileNameInput = document.getElementById('profileName');
+  const profileRoleInput = document.getElementById('profileRole');
+  const profilePhotoInput = document.getElementById('profilePhoto');
+  const profileBioInput = document.getElementById('profileBio');
+  const profileBulletsInput = document.getElementById('profileBullets');
+
+  // Assignation management elements
+  const assignList = document.getElementById('assignList');
+  const assignForm = document.getElementById('assignForm');
+
+  // Utilitaires
+  function getRandomIndices(n, max) {
+    const set = new Set();
+    while(set.size < n){
+      const r = Math.floor(Math.random()*max);
+      set.add(r);
+    }
+    return Array.from(set);
+  }
+
+  // Rendu grille chambres
+  function renderRooms(){
+    roomsGrid.innerHTML = '';
+    for(let i=1; i<=totalCases; i++){
+      const card = document.createElement('div');
+      if(i <= chambresCount){
+        card.className = 'room-card';
+        card.tabIndex = 0;
+        card.setAttribute('role','button');
+        card.setAttribute('aria-label', `Chambre ${i}`);
+        card.textContent = `Chambre ${i}`;
+        card.addEventListener('click', () => openRoom(i));
+        card.addEventListener('keypress', e => {
+          if(e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openRoom(i);
+          }
+        });
+      } else {
+        card.className = 'room-card free';
+        card.textContent = "Libre";
+        card.setAttribute('aria-label', "Place libre");
+      }
+      roomsGrid.appendChild(card);
+    }
+  }
+
+  // Ouvrir panneau chambre avec profils assignés
+  function openRoom(chambreNum){
+    overlayTitle.textContent = `Chambre ${chambreNum}`;
+    teamCards.innerHTML = '';
+    const profIndices = assignments[chambreNum-1] || getRandomIndices(3, profiles.length);
+    profIndices.forEach(i => {
+      const p = profiles[i];
+      if(!p) return;
+      const card = document.createElement('article');
+      card.className = 'team-card';
+      card.innerHTML = `
+        <div class="team-photo"><img src="${p.photo || 'https://i.pravatar.cc/150?u=' + encodeURIComponent(p.name)}" alt="Photo de ${p.name}" loading="lazy"/></div>
+        <h3 class="team-name">${p.name}</h3>
+        <p class="team-role">${p.role}</p>
+        <p class="team-bio">${p.bio}</p>
+        <ul class="team-bullets">
+          ${p.bullets.map(b => `<li>${b}</li>`).join('')}
+        </ul>
+      `;
+      teamCards.appendChild(card);
+    });
+
+    profileOverlay.classList.add('active');
+    profileOverlay.focus();
+  }
+
+  function closeOverlay(overlay){
+    overlay.classList.remove('active');
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+
+  function openOverlay(overlay){
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden', 'false');
+    overlay.focus();
+  }
+
+  closeProfileBtn.addEventListener('click', () => closeOverlay(profileOverlay));
+
+  // Gestion profils
+
+  function renderProfileList(){
+    profileList.innerHTML = '';
+    profiles.forEach((p, i) => {
+      const div = document.createElement('div');
+      div.className = 'profile-item';
+      div.innerHTML = `
+        <div class="profile-photo-small"><img src="${p.photo || 'https://i.pravatar.cc/150?u=' + encodeURIComponent(p.name)}" alt="Photo de ${p.name}" loading="lazy"></div>
+        <div class="profile-info">
+          <strong>${p.name}</strong><br />
+          <em>${p.role}</em><br />
+          <small>${p.bio}</small>
+        </div>
+        <div class="profile-actions">
+          <button type="button" aria-label="Modifier profil ${p.name}" data-index="${i}">Modifier</button>
+          <button type="button" aria-label="Supprimer profil ${p.name}" data-index="${i}">Supprimer</button>
+        </div>
+      `;
+      profileList.appendChild(div);
+    });
+
+    // Events boutons modifier/supprimer
+    profileList.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const idx = parseInt(btn.getAttribute('data-index'), 10);
+        if(btn.textContent === 'Modifier'){
+          loadProfileForm(idx);
+        } else {
+          if(confirm(`Supprimer le profil de ${profiles[idx].name} ? Cela enlèvera aussi l’assignation à toutes les chambres.`)){
+            deleteProfile(idx);
+          }
+        }
+      });
+    });
+  }
+
+  function loadProfileForm(idx){
+    const p = profiles[idx];
+    profileIndexInput.value = idx;
+    profileNameInput.value = p.name;
+    profileRoleInput.value = p.role;
+    profilePhotoInput.value = p.photo || '';
+    profileBioInput.value = p.bio;
+    profileBulletsInput.value = p.bullets.join('\n');
+  }
+
+  function clearProfileForm(){
+    profileIndexInput.value = '';
+    profileNameInput.value = '';
+    profileRoleInput.value = '';
+    profilePhotoInput.value = '';
+    profileBioInput.value = '';
+    profileBulletsInput.value = '';
+  }
+
+  profileForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const idx = profileIndexInput.value;
+    const newProfile = {
+      name: profileNameInput.value.trim(),
+      role: profileRoleInput.value.trim(),
+      photo: profilePhotoInput.value.trim() || null,
+      bio: profileBioInput.value.trim(),
+      bullets: profileBulletsInput.value.trim().split('\n').map(b => b.trim()).filter(b => b)
+    };
+    if(idx === '') {
+      // Ajouter
+      profiles.push(newProfile);
+    } else {
+      // Modifier
+      profiles[idx] = newProfile;
+      // Vérifier assignations : supprimer indices dépassés ?
+      for(let i=0; i<assignments.length; i++){
+        assignments[i] = assignments[i].filter(a => a !== parseInt(idx));
+      }
+    }
+    clearProfileForm();
+    renderProfileList();
+    renderAssignForm();
+    alert('Profil enregistré.');
+  });
+
+  function deleteProfile(idx){
+    profiles.splice(idx,1);
+    // Mise à jour assignations : retirer ce profil
+    for(let i=0; i<assignments.length; i++){
+      assignments[i] = assignments[i].filter(a => a !== idx);
+      // Décrémenter les indices supérieurs à idx
+      assignments[i] = assignments[i].map(a => a > idx ? a-1 : a);
+    }
+    renderProfileList();
+    renderAssignForm();
+    alert('Profil supprimé.');
+  }
+
+  // Gestion assignation
+
+  function renderAssignForm(){
+    assignList.innerHTML = '';
+    for(let i=1; i<=chambresCount; i++){
+      const div = document.createElement('div');
+      div.className = 'assign-chambre-item';
+      div.innerHTML = `
+        <label for="assignChambre${i}">Chambre ${i}</label>
+        <select id="assignChambre${i}" name="assignChambre${i}" class="multi-select" multiple size="5" aria-label="Assignation profils chambre ${i}">
+          ${profiles.map((p, idx) => {
+            const selected = assignments[i-1] && assignments[i-1].includes(idx) ? 'selected' : '';
+            return `<option value="${idx}" ${selected}>${p.name} (${p.role})</option>`;
+          }).join('')}
+        </select>
+      `;
+      assignList.appendChild(div);
+    }
+  }
+
+  assignForm.addEventListener('submit', e => {
+    e.preventDefault();
+    for(let i=1; i<=chambresCount; i++){
+      const sel = document.getElementById(`assignChambre${i}`);
+      const selectedOptions = Array.from(sel.selectedOptions).map(opt => parseInt(opt.value, 10));
+      if(selectedOptions.length !== 3){
+        alert(`Veuillez sélectionner exactement 3 profils pour la chambre ${i}.`);
+        sel.focus();
+        return;
+      }
+      assignments[i-1] = selectedOptions;
+    }
+    alert('Assignation mise à jour.');
+    closeOverlay(assignManagerOverlay);
+  });
+
+  // Ouverture/fermeture overlays
+
+  btnManageProfiles.addEventListener('click', () => {
+    renderProfileList();
+    clearProfileForm();
+    openOverlay(profileManagerOverlay);
+  });
+
+  profileManagerOverlay.querySelector('.close-btn').addEventListener('click', () => closeOverlay(profileManagerOverlay));
+
+  btnManageAssign.addEventListener('click', () => {
+    if(profiles.length < 3){
+      alert("Vous devez avoir au moins 3 profils pour assigner aux chambres.");
+      return;
+    }
+    renderAssignForm();
+    openOverlay(assignManagerOverlay);
+  });
+
+  assignManagerOverlay.querySelector('.close-btn').addEventListener('click', () => closeOverlay(assignManagerOverlay));
+
+  // Panneau chambre fermé
+  window.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){
+      if(profileOverlay.classList.contains('active')) closeOverlay(profileOverlay);
+      if(profileManagerOverlay.classList.contains('active')) closeOverlay(profileManagerOverlay);
+      if(assignManagerOverlay.classList.contains('active')) closeOverlay(assignManagerOverlay);
+    }
+  });
+
+  // Initial render
+  renderRooms();
+
+</script>
+
 </body>
 </html>
