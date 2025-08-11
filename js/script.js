@@ -93,8 +93,41 @@ function initGestion() {
         assignerBtn.addEventListener('click', handleAssignment);
     }
     
+    // Initialiser la prévisualisation photo
+    initPhotoPreview();
+    
     updateSoignantSelect();
     updateAssignmentsList();
+}
+
+// Fonction pour prévisualiser l'image sélectionnée
+function initPhotoPreview() {
+    const photoInput = document.getElementById('photo');
+    const preview = document.getElementById('photoPreview');
+    const previewImg = document.getElementById('previewImg');
+    
+    if (photoInput) {
+        photoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                
+                reader.readAsDataURL(file);
+            } else if (file) {
+                alert('Veuillez sélectionner un fichier image valide.');
+                photoInput.value = '';
+                preview.style.display = 'none';
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+    }
 }
 
 // Créer une carte soignant
@@ -114,33 +147,48 @@ function createSoignantCard(soignant) {
     return card;
 }
 
-// Gérer l'ajout de soignant
+// Gérer l'ajout de soignant avec upload d'image
 function handleSoignantSubmit(e) {
     e.preventDefault();
     
     const nom = document.getElementById('nom').value;
     const fonction = document.getElementById('fonction').value;
     const description = document.getElementById('description').value;
-    const photo = document.getElementById('photo').value;
+    const photoFile = document.getElementById('photo').files[0];
     
-    const soignant = {
-        id: Date.now().toString(),
-        nom,
-        fonction,
-        description,
-        photo
-    };
+    // Fonction pour sauvegarder le soignant
+    function saveSoignant(photoData = null) {
+        const soignant = {
+            id: Date.now().toString(),
+            nom,
+            fonction,
+            description,
+            photo: photoData
+        };
+        
+        soignants.push(soignant);
+        localStorage.setItem('soignants', JSON.stringify(soignants));
+        
+        // Reset form
+        e.target.reset();
+        document.getElementById('photoPreview').style.display = 'none';
+        
+        // Update select
+        updateSoignantSelect();
+        
+        alert('Soignant ajouté avec succès !');
+    }
     
-    soignants.push(soignant);
-    localStorage.setItem('soignants', JSON.stringify(soignants));
-    
-    // Reset form
-    e.target.reset();
-    
-    // Update select
-    updateSoignantSelect();
-    
-    alert('Soignant ajouté avec succès !');
+    // Si une photo est sélectionnée, la convertir en base64
+    if (photoFile) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            saveSoignant(e.target.result);
+        };
+        reader.readAsDataURL(photoFile);
+    } else {
+        saveSoignant();
+    }
 }
 
 // Gérer l'assignment
