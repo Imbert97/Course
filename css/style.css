@@ -1,0 +1,320 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    color: #2c3e50;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header */
+header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 2rem 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    font-size: 2.5rem;
+    color: #2c3e50;
+    text-align: center;
+    font-weight: 600;
+}
+
+.subtitle {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    margin-top: 0.5rem;
+}
+
+.breadcrumb {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.breadcrumb a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* Main content */
+main {
+    padding: 3rem 0;
+}
+
+.intro-section {
+    text-align: center;
+    margin-bottom: 3rem;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.intro-section h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+}
+
+/* Chambres grid */
+.chambres-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.chambre-btn {
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    border: none;
+    padding: 2rem 1rem;
+    border-radius: 15px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.chambre-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(145deg, #3498db, #2980b9);
+    color: white;
+}
+
+.chambre-btn.occupied {
+    background: linear-gradient(145deg, #2ecc71, #27ae60);
+    color: white;
+}
+
+/* Équipe container */
+.equipe-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.soignant-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.soignant-card:hover {
+    transform: translateY(-5px);
+}
+
+.soignant-photo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 1rem;
+    border: 4px solid #3498db;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.soignant-nom {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+
+.soignant-fonction {
+    font-size: 1rem;
+    color: #3498db;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.soignant-description {
+    color: #7f8c8d;
+    line-height: 1.6;
+}
+
+/* Message section */
+.message-section {
+    margin-top: 3rem;
+}
+
+.message-card {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2rem;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.message-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+}
+
+/* Admin section */
+.admin-section {
+    text-align: center;
+    margin-top: 3rem;
+}
+
+.admin-link {
+    display: inline-block;
+    background: rgba(52, 152, 219, 0.1);
+    color: #2c3e50;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.admin-link:hover {
+    background: rgba(52, 152, 219, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Forms */
+.form-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid #ecf0f1;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+button {
+    background: linear-gradient(145deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+}
+
+/* Assignments */
+.assignments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.assignment-card {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer */
+footer {
+    background: rgba(44, 62, 80, 0.9);
+    color: white;
+    text-align: center;
+    padding: 2rem 0;
+    margin-top: 3rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .chambres-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .equipe-container {
+        grid-template-columns: 1fr;
+    }
+    
+    header h1 {
+        font-size: 2rem;
+    }
+}
+
+/* Section styles */
+.gestion-section,
+.assignment-section {
+    margin-bottom: 3rem;
+}
+
+.gestion-section h2,
+.assignment-section h2,
+.current-assignments h2 {
+    color: white;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-size: 1.8rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.chambre-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.chambre-header h2 {
+    font-size: 2rem;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
