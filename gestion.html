@@ -1,48 +1,99 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Gestion des soignants</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Équipes - Urgence Pédiatrique</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h1>Ajouter ou modifier un soignant</h1>
-  <form id="profileForm">
-    <input type="text" name="nom" placeholder="Nom" required>
-    <textarea name="description" placeholder="Présentation" required></textarea>
-    <input type="file" name="photo" accept="image/*" required>
-    <select name="chambre" required>
-      <option value="">Choisir une chambre</option>
-      <script>
-        for (let i = 1; i <= 10; i++) {
-          document.write(`<option value="${i}">Chambre ${i}</option>`);
-        }
-      </script>
-    </select>
-    <button type="submit">Enregistrer</button>
-  </form>
-  <a class="link" href="index.html">Retour</a>
+    <header>
+        <div class="container">
+            <h1>⚙️ Gestion des Équipes</h1>
+            <div class="breadcrumb">
+                <a href="index.html">← Retour à l'accueil</a>
+            </div>
+        </div>
+    </header>
 
-  <script>
-    document.getElementById("profileForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-      const form = e.target;
-      const reader = new FileReader();
+    <main class="container">
+        <div class="gestion-section">
+            <h2>Ajouter/Modifier un soignant</h2>
+            
+            <form id="soignantForm" class="form-card">
+                <div class="form-group">
+                    <label for="nom">Nom complet :</label>
+                    <input type="text" id="nom" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fonction">Fonction :</label>
+                    <select id="fonction" required>
+                        <option value="">Sélectionner...</option>
+                        <option value="Médecin">Médecin</option>
+                        <option value="Infirmier(ère)">Infirmier(ère)</option>
+                        <option value="Aide-soignant(e)">Aide-soignant(e)</option>
+                        <option value="Interne">Interne</option>
+                        <option value="Externe">Externe</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Présentation :</label>
+                    <textarea id="description" placeholder="Présentez-vous aux familles..." rows="4"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="photo">Photo (URL ou base64) :</label>
+                    <input type="text" id="photo" placeholder="URL de la photo ou data:image/...">
+                </div>
+                
+                <button type="submit">Enregistrer le soignant</button>
+            </form>
+        </div>
 
-      reader.onload = function() {
-        const profiles = JSON.parse(localStorage.getItem("profiles") || "[]");
-        profiles.push({
-          nom: form.nom.value,
-          description: form.description.value,
-          photo: reader.result,
-          chambre: form.chambre.value
-        });
-        localStorage.setItem("profiles", JSON.stringify(profiles));
-        alert("Soignant ajouté !");
-        form.reset();
-      };
-      reader.readAsDataURL(form.photo.files[0]);
-    });
-  </script>
+        <div class="assignment-section">
+            <h2>Assigner à une chambre</h2>
+            
+            <div class="form-card">
+                <div class="form-group">
+                    <label for="soignantSelect">Soignant :</label>
+                    <select id="soignantSelect">
+                        <option value="">Sélectionner un soignant...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="chambreSelect">Chambre :</label>
+                    <select id="chambreSelect">
+                        <option value="">Sélectionner une chambre...</option>
+                        <option value="1">Chambre 1</option>
+                        <option value="2">Chambre 2</option>
+                        <option value="3">Chambre 3</option>
+                        <option value="4">Chambre 4</option>
+                        <option value="5">Chambre 5</option>
+                        <option value="6">Chambre 6</option>
+                        <option value="7">Chambre 7</option>
+                        <option value="8">Chambre 8</option>
+                        <option value="9">Chambre 9</option>
+                        <option value="10">Chambre 10</option>
+                    </select>
+                </div>
+                
+                <button type="button" id="assignerBtn">Assigner à la chambre</button>
+            </div>
+        </div>
+
+        <div class="current-assignments">
+            <h2>Assignments actuels</h2>
+            <div id="assignmentsList" class="assignments-grid">
+                <!-- Les assignments seront affichés ici -->
+            </div>
+        </div>
+    </main>
+
+    <script src="js/script.js"></script>
 </body>
 </html>
+
