@@ -1,37 +1,46 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Équipe de la chambre</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Équipe Soignante - Chambre</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h1 id="title"></h1>
-  <div id="team" class="team-grid"></div>
-  <a class="link" href="index.html">Retour</a>
+    <header>
+        <div class="container">
+            <h1>🏥 Équipe Soignante</h1>
+            <div class="breadcrumb">
+                <a href="index.html">← Retour aux chambres</a>
+            </div>
+        </div>
+    </header>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const num = params.get("num");
-    document.getElementById("title").textContent = `Chambre ${num}`;
+    <main class="container">
+        <div class="chambre-header">
+            <h2 id="chambreTitle">Chambre X</h2>
+            <p>Voici les trois professionnels qui s'occupent de votre enfant aujourd'hui :</p>
+        </div>
 
-    const teamDiv = document.getElementById("team");
-    const data = JSON.parse(localStorage.getItem("profiles") || "[]")
-      .filter(p => p.chambre == num);
+        <div class="equipe-container" id="equipeContainer">
+            <!-- L'équipe sera chargée par JavaScript -->
+        </div>
 
-    if (data.length === 0) {
-      teamDiv.innerHTML = "<p>Aucun soignant assigné.</p>";
-    } else {
-      data.forEach(p => {
-        teamDiv.innerHTML += `
-          <div class="card">
-            <img src="${p.photo}" alt="Photo de ${p.nom}">
-            <p>${p.nom}</p>
-            <small>${p.description}</small>
-          </div>
-        `;
-      });
-    }
-  </script>
+        <div class="message-section">
+            <div class="message-card">
+                <h3>💙 Notre engagement</h3>
+                <p>Notre équipe pluridisciplinaire travaille ensemble pour offrir les meilleurs soins à votre enfant. N'hésitez pas à nous poser vos questions.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Service d'Urgence Pédiatrique</p>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
 </body>
 </html>
