@@ -1,0 +1,45 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 15px;
+  margin: 20px auto;
+  max-width: 600px;
+}
+
+.room-btn, .link, button {
+  display: inline-block;
+  padding: 10px 15px;
+  background: #007BFF;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+.room-btn:hover, .link:hover, button:hover {
+  background: #0056b3;
+}
+
+.team-grid {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.card {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 10px;
+  width: 150px;
+}
+
+.card img {
+  max-width: 100%;
+  border-radius: 50%;
+}
