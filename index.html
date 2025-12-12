@@ -13,9 +13,9 @@
         :root {
             /* Theme "Botanical" - Eco & Natural */
             --primary: #15803d;
-            /* Green 700 (Forest) */
+            /* Green 700 */
             --primary-light: #86efac;
-            /* Green 300 (Sprout) */
+            /* Green 300 */
             --primary-dark: #14532d;
             /* Green 900 */
 
@@ -23,7 +23,7 @@
             /* Earthy Orange */
 
             --bg-body: #fcfdfa;
-            /* Off-white / Rice paper */
+            /* Off-white */
             --bg-card: #ffffff;
 
             --text-main: #1c1917;
@@ -31,11 +31,9 @@
             --text-muted: #57534e;
             /* Warm Grey */
             --border: #dcfce7;
-            /* Very light green border */
 
             --radius: 16px;
             --shadow: 0 4px 20px -2px rgba(21, 128, 61, 0.1);
-            /* Greenish shadow */
         }
 
         * {
@@ -49,7 +47,6 @@
             background-color: var(--bg-body);
             background-image: radial-gradient(#dcfce7 1px, transparent 1px);
             background-size: 24px 24px;
-            /* Subtle dot pattern */
             color: var(--text-main);
             height: 100vh;
             display: flex;
@@ -60,7 +57,7 @@
         /* Header */
         header {
             padding: 24px;
-            background: rgba(252, 253, 250, 0.9);
+            background: rgba(252, 253, 250, 0.95);
             backdrop-filter: blur(8px);
             z-index: 10;
             display: flex;
@@ -150,6 +147,15 @@
             color: var(--primary-dark);
         }
 
+        .recipe-meta {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
         .recipe-ingredients {
             font-size: 0.95rem;
             color: var(--text-muted);
@@ -157,6 +163,7 @@
             line-height: 1.6;
         }
 
+        /* Buttons */
         .btn {
             background: var(--primary);
             color: white;
@@ -262,13 +269,13 @@
             height: 24px;
             border: 2px solid var(--primary);
             border-radius: 50%;
-            /* Rounded checkbox for organic feel */
             margin-right: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
             background: white;
+            flex-shrink: 0;
         }
 
         .shopping-item.checked .checkbox {
@@ -301,7 +308,6 @@
         }
 
         input {
-            flex: 1;
             background: white;
             border: 2px solid #e5e7eb;
             padding: 14px 18px;
@@ -319,10 +325,49 @@
             box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.1);
         }
 
+        .qty-input {
+            width: 80px;
+            text-align: center;
+        }
+
+        .main-input {
+            flex: 1;
+        }
+
         #quickAddBtn {
             border-radius: 12px;
             font-size: 1.5rem;
             padding: 0 24px;
+        }
+
+        /* Servings Control */
+        .servings-control {
+            display: inline-flex;
+            align-items: center;
+            background: #f0fdf4;
+            border-radius: 8px;
+            padding: 4px;
+            gap: 8px;
+        }
+
+        .servings-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: none;
+            background: white;
+            color: var(--primary);
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .servings-btn:hover {
+            background: var(--primary);
+            color: white;
         }
 
         /* Navigation */
@@ -373,7 +418,6 @@
             right: 0;
             bottom: 0;
             background: rgba(20, 83, 45, 0.2);
-            /* Green tinted overlay */
             backdrop-filter: blur(4px);
             z-index: 100;
             display: none;
@@ -486,20 +530,6 @@
             margin-top: 60px;
             font-size: 1.1rem;
         }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #bbf7d0;
-            border-radius: 3px;
-        }
     </style>
 </head>
 
@@ -514,7 +544,8 @@
         <!-- Section: Liste de Courses -->
         <section id="view-list" class="view-section active">
             <div class="input-group">
-                <input type="text" id="quickAddInput" placeholder="Ajouter un article...">
+                <input type="number" id="quickAddQty" class="qty-input" placeholder="Qté">
+                <input type="text" id="quickAddInput" class="main-input" placeholder="Ajouter un article...">
                 <button class="btn" id="quickAddBtn">+</button>
             </div>
             <div id="shoppingListContainer">
@@ -550,7 +581,7 @@
         </div>
     </nav>
 
-    <!-- FAB for adding recipes (only visible in recipes view) -->
+    <!-- FAB for adding recipes -->
     <button class="fab" id="addRecipeFab" style="display: none;" onclick="app.openModal()">+</button>
 
     <!-- Modal Ajout Recette -->
@@ -558,13 +589,17 @@
         <div class="modal">
             <h2 class="modal-title">Nouvelle Recette</h2>
             <div class="form-group">
-                <label>Nom</label>
-                <input type="text" id="recipeName" placeholder="ex: Pâtes Carbonara">
+                <label>Nom de la recette</label>
+                <input type="text" id="recipeName" placeholder="ex: Salade César">
             </div>
             <div class="form-group">
-                <label>Ingrédients</label>
+                <label>Pour combien de personnes ? (Base)</label>
+                <input type="number" id="recipeServings" value="2" min="1" style="width: 100px;">
+            </div>
+            <div class="form-group">
+                <label>Ingrédients (Quantité + Nom, un par ligne)</label>
                 <textarea id="recipeIngredients"
-                    placeholder="500g Pâtes&#10;200g Lardons&#10;4 Oeufs&#10;Parmesan"></textarea>
+                    placeholder="200g Lardons&#10;1 Laitue Romaine&#10;50g Parmesan"></textarea>
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 12px;">
                 <button class="btn btn-outline" onclick="app.closeModal()">Annuler</button>
@@ -598,6 +633,12 @@
             init() {
                 this.loadData();
                 this.checkUser();
+
+                // Seed Example Recipe if empty
+                if (this.data.recipes.length === 0) {
+                    this.seedExampleRecipe();
+                }
+
                 this.render();
 
                 // Event Listeners
@@ -606,6 +647,22 @@
                     if (e.key === 'Enter') this.addQuickItem();
                 });
                 document.getElementById('shareBtn').addEventListener('click', () => this.shareList());
+            },
+
+            seedExampleRecipe() {
+                this.data.recipes.push({
+                    id: Date.now(),
+                    name: "Salade César",
+                    servings: 2,
+                    ingredients: [
+                        "1 Laitue Romaine",
+                        "200g Poulet",
+                        "50g Parmesan",
+                        "40g Croûtons",
+                        "1 Sauce César"
+                    ]
+                });
+                this.saveData();
             },
 
             loadData() {
@@ -654,21 +711,52 @@
                 document.getElementById('addRecipeFab').style.display = viewName === 'recipes' ? 'flex' : 'none';
             },
 
+            // --- Helper: Ingredient Parsing ---
+            parseIngredient(str) {
+                // Try to match number at start: "200g Lardons" -> qty: 200, unit: "g", name: "Lardons"
+                // Or "2 Laitue" -> qty: 2, unit: "", name: "Laitue"
+                const match = str.match(/^(\d+(?:[\.,]\d+)?)\s*(\w*)\s+(.*)$/);
+                if (match) {
+                    return {
+                        qty: parseFloat(match[1].replace(',', '.')),
+                        unit: match[2],
+                        name: match[3],
+                        original: str
+                    };
+                }
+                return { qty: 1, unit: '', name: str, original: str, noQty: true };
+            },
+
             // --- Shopping List Logic ---
 
             addQuickItem() {
                 const input = document.getElementById('quickAddInput');
-                const val = input.value.trim();
-                if (!val) return;
+                const qtyInput = document.getElementById('quickAddQty');
+
+                const name = input.value.trim();
+                let qty = qtyInput.value.trim();
+
+                if (!name) return;
+
+                // Check Duplicate
+                const exists = this.data.shoppingList.find(i => i.name.toLowerCase().includes(name.toLowerCase()));
+                if (exists) {
+                    alert(`⚠️ "${exists.name}" est déjà dans la liste !`);
+                    return;
+                }
+
+                const fullName = qty ? `${qty} ${name}` : name;
 
                 this.data.shoppingList.unshift({
                     id: Date.now(),
-                    name: val,
+                    name: fullName,
                     checked: false,
                     timestamp: Date.now(),
                     addedBy: this.data.currentUser
                 });
+
                 input.value = '';
+                qtyInput.value = '';
                 this.saveData();
             },
 
@@ -693,23 +781,112 @@
                 }
             },
 
-            addRecipeToList(recipeId) {
+            // --- Recipe Logic ---
+
+            addRecipeToList(recipeId, currentServings) {
                 const recipe = this.data.recipes.find(r => r.id === recipeId);
                 if (!recipe) return;
 
-                recipe.ingredients.forEach(ing => {
-                    this.data.shoppingList.unshift({
-                        id: Date.now() + Math.random(),
-                        name: ing,
-                        checked: false,
-                        timestamp: Date.now(),
-                        addedBy: this.data.currentUser
-                    });
+                const ratio = currentServings / (recipe.servings || 1);
+                let addedCount = 0;
+                let duplicateCount = 0;
+
+                recipe.ingredients.forEach(ingStr => {
+                    const parsed = this.parseIngredient(ingStr);
+
+                    // Check Duplicate (fuzzy match on name)
+                    const exists = this.data.shoppingList.find(i => i.name.toLowerCase().includes(parsed.name.toLowerCase()));
+
+                    if (exists) {
+                        duplicateCount++;
+                    } else {
+                        // Scale Quantity
+                        let finalName = parsed.original;
+                        if (!parsed.noQty) {
+                            const newQty = Math.round((parsed.qty * ratio) * 10) / 10; // Round to 1 decimal
+                            finalName = `${newQty}${parsed.unit} ${parsed.name}`;
+                        } else if (ratio > 1) {
+                            // If no qty but scaling up, maybe just add (x2)? No, keep simple.
+                            // Or assume 1 and scale?
+                            const newQty = Math.round((1 * ratio) * 10) / 10;
+                            finalName = `${newQty} ${parsed.name}`;
+                        }
+
+                        this.data.shoppingList.unshift({
+                            id: Date.now() + Math.random(),
+                            name: finalName,
+                            checked: false,
+                            timestamp: Date.now(),
+                            addedBy: this.data.currentUser
+                        });
+                        addedCount++;
+                    }
                 });
 
                 this.saveData();
                 this.switchView('list');
-                alert(`Ingrédients de "${recipe.name}" ajoutés !`);
+
+                let msg = `${addedCount} ingrédients ajoutés.`;
+                if (duplicateCount > 0) msg += `\n(${duplicateCount} ignorés car déjà présents)`;
+                alert(msg);
+            },
+
+            openModal() { document.getElementById('recipeModal').classList.add('open'); },
+            closeModal() {
+                document.getElementById('recipeModal').classList.remove('open');
+                document.getElementById('recipeName').value = '';
+                document.getElementById('recipeIngredients').value = '';
+                document.getElementById('recipeServings').value = 2;
+            },
+
+            saveRecipe() {
+                const name = document.getElementById('recipeName').value.trim();
+                const ingText = document.getElementById('recipeIngredients').value.trim();
+                const servings = parseInt(document.getElementById('recipeServings').value) || 2;
+
+                if (!name || !ingText) return alert('Veuillez remplir tous les champs');
+
+                const ingredients = ingText.split('\n').map(l => l.trim()).filter(l => l);
+
+                this.data.recipes.push({
+                    id: Date.now(),
+                    name,
+                    servings,
+                    ingredients
+                });
+
+                this.closeModal();
+                this.saveData();
+            },
+
+            deleteRecipe(id) {
+                if (confirm('Supprimer cette recette ?')) {
+                    this.data.recipes = this.data.recipes.filter(r => r.id !== id);
+                    this.saveData();
+                }
+            },
+
+            updateRecipeServingsDisplay(recipeId, change) {
+                const el = document.getElementById(`servings-${recipeId}`);
+                let current = parseInt(el.innerText);
+                let newVal = current + change;
+                if (newVal < 1) newVal = 1;
+                el.innerText = newVal;
+
+                // Update displayed ingredients
+                const recipe = this.data.recipes.find(r => r.id === recipeId);
+                const listEl = document.getElementById(`ing-list-${recipeId}`);
+                if (recipe && listEl) {
+                    const ratio = newVal / (recipe.servings || 1);
+                    listEl.innerHTML = recipe.ingredients.map(ing => {
+                        const parsed = this.parseIngredient(ing);
+                        if (!parsed.noQty) {
+                            const newQty = Math.round((parsed.qty * ratio) * 10) / 10;
+                            return `${newQty}${parsed.unit} ${parsed.name}`;
+                        }
+                        return ing; // Cannot scale no-qty items easily without assuming 1
+                    }).join(', ');
+                }
             },
 
             shareList() {
@@ -723,40 +900,6 @@
                 }).catch(err => {
                     alert('Voici la liste :\n\n' + text);
                 });
-            },
-
-            // --- Recipe Logic ---
-
-            openModal() { document.getElementById('recipeModal').classList.add('open'); },
-            closeModal() {
-                document.getElementById('recipeModal').classList.remove('open');
-                document.getElementById('recipeName').value = '';
-                document.getElementById('recipeIngredients').value = '';
-            },
-
-            saveRecipe() {
-                const name = document.getElementById('recipeName').value.trim();
-                const ingText = document.getElementById('recipeIngredients').value.trim();
-
-                if (!name || !ingText) return alert('Veuillez remplir tous les champs');
-
-                const ingredients = ingText.split('\n').map(l => l.trim()).filter(l => l);
-
-                this.data.recipes.push({
-                    id: Date.now(),
-                    name,
-                    ingredients
-                });
-
-                this.closeModal();
-                this.saveData();
-            },
-
-            deleteRecipe(id) {
-                if (confirm('Supprimer cette recette ?')) {
-                    this.data.recipes = this.data.recipes.filter(r => r.id !== id);
-                    this.saveData();
-                }
             },
 
             // --- Rendering ---
@@ -819,13 +962,30 @@
                 this.data.recipes.forEach(recipe => {
                     const el = document.createElement('div');
                     el.className = 'card';
+                    const baseServings = recipe.servings || 2; // Default to 2 if missing
+
                     el.innerHTML = `
                         <div class="recipe-header">
                             <h3 class="recipe-title">${recipe.name}</h3>
                             <button class="btn btn-sm btn-icon" onclick="app.deleteRecipe(${recipe.id})">🗑️</button>
                         </div>
-                        <p class="recipe-ingredients">${recipe.ingredients.length} ingrédients</p>
-                        <button class="btn btn-outline btn-sm" style="width:100%" onclick="app.addRecipeToList(${recipe.id})">
+                        
+                        <div class="recipe-meta">
+                            <span>Pour</span>
+                            <div class="servings-control">
+                                <button class="servings-btn" onclick="app.updateRecipeServingsDisplay(${recipe.id}, -1)">-</button>
+                                <span id="servings-${recipe.id}" style="font-weight:600; min-width:16px; text-align:center;">${baseServings}</span>
+                                <button class="servings-btn" onclick="app.updateRecipeServingsDisplay(${recipe.id}, 1)">+</button>
+                            </div>
+                            <span>personnes</span>
+                        </div>
+
+                        <p class="recipe-ingredients" id="ing-list-${recipe.id}">
+                            ${recipe.ingredients.join(', ')}
+                        </p>
+                        
+                        <button class="btn btn-outline btn-sm" style="width:100%" 
+                            onclick="app.addRecipeToList(${recipe.id}, parseInt(document.getElementById('servings-${recipe.id}').innerText))">
                             + Ajouter à la liste
                         </button>
                     `;
