@@ -1,852 +1,842 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Urgences Pédiatriques - Gestion des équipes par chambre</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
-  :root {
-    --color-bg: #fff7f0;
-    --color-primary: #f4a261;
-    --color-primary-light: #fcdcbf;
-    --color-secondary: #e76f51;
-    --color-text-dark: #3e2f1c;
-    --color-text-muted: #7a6851;
-    --color-card-bg: #fff3e0;
-    --color-overlay-bg: rgba(255, 244, 224, 0.95);
-    --radius: 16px;
-    --shadow: 0 10px 25px rgba(231,111,81,0.15);
-    font-family: 'Inter', sans-serif;
-  }
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0; padding: 0;
-    background: var(--color-bg);
-    color: var(--color-text-dark);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    font-size: 16px;
-  }
-  h1 {
-    text-align: center;
-    margin: 1rem 0 1.5rem;
-    color: var(--color-secondary);
-  }
-  main {
-    flex: 1;
-    max-width: 960px;
-    margin: 0 auto 3rem;
-    padding: 0 1rem;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mes Courses</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* Theme "Botanical" - Eco & Natural */
+            --primary: #15803d;
+            /* Green 700 (Forest) */
+            --primary-light: #86efac;
+            /* Green 300 (Sprout) */
+            --primary-dark: #14532d;
+            /* Green 900 */
 
-  /* Boutons gestion */
-  .action-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    margin-bottom: 1.75rem;
-  }
-  button.action-btn {
-    background: var(--color-primary);
-    border: none;
-    padding: 0.65rem 1.25rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: var(--radius);
-    cursor: pointer;
-    color: white;
-    box-shadow: var(--shadow);
-    transition: background 0.3s ease;
-  }
-  button.action-btn:hover {
-    background: var(--color-secondary);
-  }
+            --accent: #d97706;
+            /* Earthy Orange */
 
-  .rooms-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(5, 1fr);
-    gap: 1.25rem;
-  }
-  .room-card {
-    background: var(--color-card-bg);
-    border-radius: var(--radius);
-    padding: 1.5rem 1rem;
-    box-shadow: var(--shadow);
-    cursor: pointer;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 1.3rem;
-    color: var(--color-secondary);
-    user-select: none;
-  }
-  .room-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 14px 40px rgba(231,111,81,0.25);
-  }
-  .room-card.free {
-    background: #f9f5f0;
-    color: var(--color-text-muted);
-    cursor: default;
-    box-shadow: none;
-    font-weight: 400;
-    font-style: italic;
-  }
-  .room-card.free:hover {
-    transform: none;
-    box-shadow: none;
-  }
+            --bg-body: #fcfdfa;
+            /* Off-white / Rice paper */
+            --bg-card: #ffffff;
 
-  /* Overlay full screen panel */
-  .overlay {
-    position: fixed;
-    top:0; left:0; right:0; bottom:0;
-    background: var(--color-overlay-bg);
-    backdrop-filter: blur(6px);
-    display: flex;
-    flex-direction: column;
-    padding: 2rem 1rem 2rem;
-    overflow-y: auto;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(40px);
-    transition: opacity 0.35s ease, transform 0.35s ease;
-    z-index: 1000;
-  }
-  .overlay.active {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
-  }
-  .overlay header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-  }
-  .overlay header h2 {
-    margin: 0;
-    font-weight: 700;
-    font-size: 1.7rem;
-    color: var(--color-secondary);
-  }
-  .overlay header button.close-btn {
-    font-size: 1.5rem;
-    background: var(--color-secondary);
-    border: none;
-    color: white;
-    border-radius: 50%;
-    width: 38px;
-    height: 38px;
-    cursor: pointer;
-    box-shadow: var(--shadow);
-    transition: background 0.3s ease;
-  }
-  .overlay header button.close-btn:hover {
-    background: #d65c43;
-  }
+            --text-main: #1c1917;
+            /* Warm Black */
+            --text-muted: #57534e;
+            /* Warm Grey */
+            --border: #dcfce7;
+            /* Very light green border */
 
-  /* Profil équipe dans overlay chambre */
-  .team-cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    justify-content: center;
-  }
-  .team-card {
-    background: var(--color-card-bg);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    max-width: 280px;
-    padding: 1.5rem 1.5rem 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: transform 0.3s ease;
-  }
-  .team-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 50px rgba(231,111,81,0.3);
-  }
-  .team-photo {
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    overflow: hidden;
-    box-shadow: 0 4px 18px rgba(231,111,81,0.25);
-    margin-bottom: 1rem;
-  }
-  .team-photo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .team-name {
-    font-weight: 600;
-    font-size: 1.2rem;
-    margin: 0 0 0.25rem;
-    text-align: center;
-  }
-  .team-role {
-    font-size: 1rem;
-    font-style: italic;
-    color: var(--color-secondary);
-    margin: 0 0 0.75rem;
-    text-align: center;
-  }
-  .team-bio {
-    font-size: 0.9rem;
-    color: var(--color-text-dark);
-    margin-bottom: 1rem;
-    text-align: center;
-  }
-  .team-bullets {
-    list-style-type: disc;
-    padding-left: 1.2rem;
-    margin: 0;
-    color: var(--color-text-muted);
-    font-size: 0.9rem;
-    max-width: 250px;
-  }
+            --radius: 16px;
+            --shadow: 0 4px 20px -2px rgba(21, 128, 61, 0.1);
+            /* Greenish shadow */
+        }
 
-  /* Formulaires profils et assignation */
-  form {
-    max-width: 400px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  label {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-  }
-  input[type="text"], textarea, select {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 1rem;
-    resize: vertical;
-  }
-  textarea {
-    min-height: 60px;
-  }
-  button[type="submit"] {
-    background: var(--color-primary);
-    border: none;
-    padding: 0.65rem 1.25rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: var(--radius);
-    cursor: pointer;
-    color: white;
-    box-shadow: var(--shadow);
-    transition: background 0.3s ease;
-  }
-  button[type="submit"]:hover {
-    background: var(--color-secondary);
-  }
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-  /* Liste profils modifiable */
-  .profile-list {
-    max-width: 600px;
-    margin: 0 auto 2rem;
-  }
-  .profile-item {
-    background: var(--color-card-bg);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 1rem 1.5rem;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  .profile-photo-small {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-  .profile-photo-small img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .profile-info {
-    flex-grow: 1;
-  }
-  .profile-actions {
-    display: flex;
-    gap: 0.5rem;
-  }
-  .profile-actions button {
-    background: var(--color-secondary);
-    border: none;
-    padding: 0.35rem 0.7rem;
-    border-radius: 8px;
-    color: white;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: background 0.3s ease;
-  }
-  .profile-actions button:hover {
-    background: #d65c43;
-  }
+        body {
+            margin: 0;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            background-image: radial-gradient(#dcfce7 1px, transparent 1px);
+            background-size: 24px 24px;
+            /* Subtle dot pattern */
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-  /* Assignation chambres */
-  .assign-chambre-list {
-    max-width: 700px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  .assign-chambre-item {
-    background: var(--color-card-bg);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 1rem 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-  .assign-chambre-item label {
-    flex: 0 0 130px;
-    font-weight: 700;
-    color: var(--color-secondary);
-  }
-  .assign-chambre-item select {
-    flex-grow: 1;
-    min-width: 200px;
-    height: 36px;
-    border-radius: 8px;
-  }
-  .multi-select {
-    height: 80px;
-  }
+        /* Header */
+        header {
+            padding: 24px;
+            background: rgba(252, 253, 250, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+        }
 
-  /* Responsive */
-  @media (max-width: 640px){
-    .team-cards {
-      flex-direction: column;
-      align-items: center;
-    }
-    .team-card {
-      max-width: 100%;
-      width: 320px;
-    }
-    .rooms-grid {
-      grid-template-columns: repeat(2,1fr);
-      grid-template-rows: auto;
-    }
-    .room-card {
-      font-size: 1.1rem;
-      padding: 1.25rem 1rem;
-    }
-    .assign-chambre-item {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    .assign-chambre-item label {
-      flex: none;
-      margin-bottom: 0.5rem;
-    }
-    .assign-chambre-item select {
-      width: 100%;
-    }
-  }
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-  footer {
-    text-align: center;
-    padding: 1rem 0 2rem;
-    font-size: 0.85rem;
-    color: var(--color-text-muted);
-  }
-</style>
+        h1::before {
+            content: '🌿';
+            font-size: 1.5rem;
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+            padding-bottom: 110px;
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Cards & Lists */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-light);
+        }
+
+        .recipe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .recipe-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--primary-dark);
+        }
+
+        .recipe-ingredients {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(21, 128, 61, 0.2);
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-outline {
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-danger {
+            background: #fef2f2;
+            color: #ef4444;
+            box-shadow: none;
+        }
+
+        .btn-danger:hover {
+            background: #fee2e2;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+        }
+
+        .btn-icon {
+            padding: 8px;
+            border-radius: 50%;
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            color: var(--text-muted);
+            box-shadow: none;
+        }
+
+        .btn-icon:hover {
+            background: #f5f5f4;
+            color: var(--danger);
+        }
+
+        /* Shopping List */
+        .shopping-item {
+            display: flex;
+            align-items: center;
+            padding: 14px;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            user-select: none;
+            border: 1px solid transparent;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s;
+        }
+
+        .shopping-item:hover {
+            border-color: var(--primary-light);
+            transform: translateX(2px);
+        }
+
+        .shopping-item.checked {
+            opacity: 0.5;
+            background: #f0fdf4;
+        }
+
+        .shopping-item.checked .item-name {
+            text-decoration: line-through;
+            color: var(--primary);
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            /* Rounded checkbox for organic feel */
+            margin-right: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .shopping-item.checked .checkbox {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .checkbox::after {
+            content: '🌱';
+            font-size: 14px;
+            display: none;
+            margin-top: -2px;
+        }
+
+        .shopping-item.checked .checkbox::after {
+            display: block;
+        }
+
+        .item-name {
+            flex: 1;
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+
+        /* Input Group */
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        input {
+            flex: 1;
+            background: white;
+            border: 2px solid #e5e7eb;
+            padding: 14px 18px;
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.1);
+        }
+
+        #quickAddBtn {
+            border-radius: 12px;
+            font-size: 1.5rem;
+            padding: 0 24px;
+        }
+
+        /* Navigation */
+        nav {
+            background: white;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid #f0f0f0;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .nav-item {
+            color: #a8a29e;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.75rem;
+            gap: 4px;
+            padding: 8px 24px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            background: #f0fdf4;
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(20, 83, 45, 0.2);
+            /* Green tinted overlay */
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 25px 50px -12px rgba(21, 128, 61, 0.25);
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid var(--border);
+        }
+
+        @keyframes slideUpModal {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-title {
+            margin-top: 0;
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+            color: var(--primary-dark);
+            font-weight: 800;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            resize: vertical;
+            background: #fcfdfa;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            color: var(--text-main);
+            padding: 14px;
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 100px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 10px 20px -5px rgba(21, 128, 61, 0.4);
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 40;
+        }
+
+        .fab:hover {
+            transform: translateY(-4px) rotate(90deg);
+            background: var(--primary-dark);
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            margin-top: 60px;
+            font-size: 1.1rem;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #bbf7d0;
+            border-radius: 3px;
+        }
+    </style>
 </head>
+
 <body>
 
-<h1>Urgences Pédiatriques - Gestion des équipes par chambre</h1>
+    <header>
+        <h1>Mes Courses</h1>
+        <button class="btn btn-sm btn-outline" id="shareBtn">Partager</button>
+    </header>
 
-<div class="action-buttons">
-  <button id="btnManageProfiles" class="action-btn" aria-haspopup="dialog" aria-controls="profileManagerOverlay">Modifier les profils</button>
-  <button id="btnManageAssign" class="action-btn" aria-haspopup="dialog" aria-controls="assignManagerOverlay">Modifier l'assignation des chambres</button>
-</div>
+    <main>
+        <!-- Section: Liste de Courses -->
+        <section id="view-list" class="view-section active">
+            <div class="input-group">
+                <input type="text" id="quickAddInput" placeholder="Ajouter un article...">
+                <button class="btn" id="quickAddBtn">+</button>
+            </div>
+            <div id="shoppingListContainer">
+                <!-- Items will be injected here -->
+            </div>
+            <div style="margin-top: 24px; text-align: center;">
+                <button class="btn btn-sm btn-danger" style="background: transparent; color: var(--text-muted);"
+                    onclick="app.clearList()">Tout effacer</button>
+            </div>
+        </section>
 
-<main>
-  <div class="rooms-grid" id="roomsGrid" aria-label="Liste des chambres">
-    <!-- Cases insérées par JS -->
-  </div>
-</main>
+        <!-- Section: Recettes -->
+        <section id="view-recipes" class="view-section">
+            <div id="recipesContainer">
+                <!-- Recipes will be injected here -->
+            </div>
+            <div class="empty-state" id="noRecipesMsg" style="display:none;">
+                <p>Aucune recette.</p>
+                <p>Créez-en une nouvelle !</p>
+            </div>
+        </section>
+    </main>
 
-<!-- Overlay consultation chambre -->
-<div id="profileOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="overlayTitle" tabindex="-1">
-  <header>
-    <h2 id="overlayTitle">Chambre 1</h2>
-    <button class="close-btn" aria-label="Fermer la fiche">&times;</button>
-  </header>
-  <div class="team-cards" id="teamCards">
-    <!-- Profils injectés par JS -->
-  </div>
-</div>
+    <!-- Navigation Bottom -->
+    <nav>
+        <div class="nav-item active" onclick="app.switchView('list')">
+            <span class="nav-icon">🛒</span>
+            <span>Liste</span>
+        </div>
+        <div class="nav-item" onclick="app.switchView('recipes')">
+            <span class="nav-icon">📖</span>
+            <span>Recettes</span>
+        </div>
+    </nav>
 
-<!-- Overlay gestion profils -->
-<div id="profileManagerOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="profileManagerTitle" tabindex="-1" aria-hidden="true" >
-  <header>
-    <h2 id="profileManagerTitle">Gestion des profils</h2>
-    <button class="close-btn" aria-label="Fermer la gestion des profils">&times;</button>
-  </header>
-  <section class="profile-list" id="profileList">
-    <!-- Liste des profils -->
-  </section>
-  <section>
-    <h3>Ajouter / Modifier un profil</h3>
-    <form id="profileForm" aria-label="Formulaire de profil">
-      <input type="hidden" id="profileIndex" />
-      <label for="profileName">Nom complet</label>
-      <input type="text" id="profileName" required />
-      <label for="profileRole">Rôle</label>
-      <input type="text" id="profileRole" required />
-      <label for="profilePhoto">URL Photo (facultatif)</label>
-      <input type="text" id="profilePhoto" placeholder="https://..." />
-      <label for="profileBio">Présentation courte</label>
-      <textarea id="profileBio" required></textarea>
-      <label for="profileBullets">Points clés (une idée par ligne)</label>
-      <textarea id="profileBullets" placeholder="Ex: Passionné par la musique classique"></textarea>
-      <button type="submit">Enregistrer</button>
-    </form>
-  </section>
-</div>
+    <!-- FAB for adding recipes (only visible in recipes view) -->
+    <button class="fab" id="addRecipeFab" style="display: none;" onclick="app.openModal()">+</button>
 
-<!-- Overlay gestion assignation -->
-<div id="assignManagerOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="assignManagerTitle" tabindex="-1" aria-hidden="true" >
-  <header>
-    <h2 id="assignManagerTitle">Gestion de l'assignation des chambres</h2>
-    <button class="close-btn" aria-label="Fermer la gestion de l'assignation">&times;</button>
-  </header>
-  <form id="assignForm" aria-label="Formulaire d'assignation">
-    <div class="assign-chambre-list" id="assignList">
-      <!-- Champs assignation chambre -->
+    <!-- Modal Ajout Recette -->
+    <div class="modal-overlay" id="recipeModal">
+        <div class="modal">
+            <h2 class="modal-title">Nouvelle Recette</h2>
+            <div class="form-group">
+                <label>Nom</label>
+                <input type="text" id="recipeName" placeholder="ex: Pâtes Carbonara">
+            </div>
+            <div class="form-group">
+                <label>Ingrédients</label>
+                <textarea id="recipeIngredients"
+                    placeholder="500g Pâtes&#10;200g Lardons&#10;4 Oeufs&#10;Parmesan"></textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="btn btn-outline" onclick="app.closeModal()">Annuler</button>
+                <button class="btn" onclick="app.saveRecipe()">Enregistrer</button>
+            </div>
+        </div>
     </div>
-    <button type="submit" style="margin: 1.5rem auto 0; display: block;">Enregistrer l'assignation</button>
-  </form>
-</div>
 
-<footer>
-  <small>Ce site est une démo pour faciliter la présentation des équipes aux familles. <br>Les données sont fictives et locales.</small>
-</footer>
-
-<script>
-  // Données initiales profils
-  let profiles = [
-    {
-      name: "Dr. Marie Dupont",
-      role: "Médecin urgentiste",
-      photo: "https://i.pravatar.cc/150?img=12",
-      bio: "Expérience en pédiatrie, approche calme et rassurante.",
-      bullets: [
-        "Spécialiste des urgences pédiatriques depuis 10 ans",
-        "Passionnée par la musique classique",
-        "Engagée dans le bien-être des enfants"
-      ]
-    },
-    {
-      name: "Infirmier Paul Martin",
-      role: "Infirmier",
-      photo: "https://i.pravatar.cc/150?img=5",
-      bio: "Soins attentifs et expert des voies respiratoires.",
-      bullets: [
-        "10 ans d'expérience en soins intensifs pédiatriques",
-        "Fan de randonnée et nature",
-        "Très à l'écoute des familles"
-      ]
-    },
-    {
-      name: "Infirmière Anaïs Leroy",
-      role: "Infirmière d'unité",
-      photo: "https://i.pravatar.cc/150?img=15",
-      bio: "Accompagnement des familles et gestion des traitements.",
-      bullets: [
-        "Diplômée en soins pédiatriques",
-        "Aime le yoga et la méditation",
-        "Soutien moral important pour les enfants"
-      ]
-    },
-    {
-      name: "Dr. Louis Bernard",
-      role: "Pédiatre",
-      photo: "https://i.pravatar.cc/150?img=20",
-      bio: "Approche douce et expertise médicale pointue.",
-      bullets: [
-        "Spécialiste en maladies infantiles rares",
-        "Amateur de peinture",
-        "Volontaire dans des ONG médicales"
-      ]
-    },
-    {
-      name: "Auxiliaire Sophie Morel",
-      role: "Auxiliaire de puériculture",
-      photo: "https://i.pravatar.cc/150?img=25",
-      bio: "Soutien constant et bienveillant auprès des enfants.",
-      bullets: [
-        "Formation en petite enfance",
-        "Passionnée par la lecture jeunesse",
-        "Créative dans l'animation d'activités"
-      ]
-    },
-    {
-      name: "Dr. Camille Lefèvre",
-      role: "Médecin urgentiste",
-      photo: "https://i.pravatar.cc/150?img=30",
-      bio: "Réactive et expérimentée en situations critiques.",
-      bullets: [
-        "Plus de 8 ans aux urgences pédiatriques",
-        "Aime la photographie",
-        "Grande patience et empathie"
-      ]
-    },
-    {
-      name: "Infirmier Julien Roche",
-      role: "Infirmier",
-      photo: "https://i.pravatar.cc/150?img=35",
-      bio: "Spécialiste en soins post-opératoires.",
-      bullets: [
-        "Expert en gestion de la douleur",
-        "Passionné de cyclisme",
-        "Soutient les familles en période difficile"
-      ]
-    },
-    {
-      name: "Infirmière Claire Fontaine",
-      role: "Infirmière d'unité",
-      photo: "https://i.pravatar.cc/150?img=40",
-      bio: "Organisation et douceur dans les soins quotidiens.",
-      bullets: [
-        "Expérience de 7 ans en pédiatrie",
-        "Amatrice de jardinage",
-        "Toujours souriante et rassurante"
-      ]
-    },
-    {
-      name: "Dr. Antoine Petit",
-      role: "Pédiatre",
-      photo: "https://i.pravatar.cc/150?img=45",
-      bio: "Compétent et attentif aux besoins spécifiques.",
-      bullets: [
-        "Recherche médicale active en pédiatrie",
-        "Fan de course à pied",
-        "Très proche des enfants hospitalisés"
-      ]
-    },
-    {
-      name: "Auxiliaire Emma Dubois",
-      role: "Auxiliaire de puériculture",
-      photo: "https://i.pravatar.cc/150?img=50",
-      bio: "Soutien doux et présence rassurante.",
-      bullets: [
-        "Formation spécialisée en puériculture",
-        "Aime les activités manuelles",
-        "Très à l’écoute des besoins des enfants"
-      ]
-    }
-  ];
-
-  const chambresCount = 10;
-  const totalCases = 25;
-
-  // Assignation chambre -> tableau indices profils (3 par chambre)
-  // Par défaut : 3 profils aléatoires par chambre
-  let assignments = [];
-  function resetAssignments() {
-    assignments = [];
-    for(let i=0; i<chambresCount; i++) {
-      assignments[i] = getRandomIndices(3, profiles.length);
-    }
-  }
-  resetAssignments();
-
-  // DOM elements
-  const roomsGrid = document.getElementById('roomsGrid');
-  const profileOverlay = document.getElementById('profileOverlay');
-  const overlayTitle = document.getElementById('overlayTitle');
-  const teamCards = document.getElementById('teamCards');
-  const closeProfileBtn = profileOverlay.querySelector('.close-btn');
-
-  const btnManageProfiles = document.getElementById('btnManageProfiles');
-  const btnManageAssign = document.getElementById('btnManageAssign');
-
-  const profileManagerOverlay = document.getElementById('profileManagerOverlay');
-  const assignManagerOverlay = document.getElementById('assignManagerOverlay');
-
-  // Profile management elements
-  const profileList = document.getElementById('profileList');
-  const profileForm = document.getElementById('profileForm');
-  const profileIndexInput = document.getElementById('profileIndex');
-  const profileNameInput = document.getElementById('profileName');
-  const profileRoleInput = document.getElementById('profileRole');
-  const profilePhotoInput = document.getElementById('profilePhoto');
-  const profileBioInput = document.getElementById('profileBio');
-  const profileBulletsInput = document.getElementById('profileBullets');
-
-  // Assignation management elements
-  const assignList = document.getElementById('assignList');
-  const assignForm = document.getElementById('assignForm');
-
-  // Utilitaires
-  function getRandomIndices(n, max) {
-    const set = new Set();
-    while(set.size < n){
-      const r = Math.floor(Math.random()*max);
-      set.add(r);
-    }
-    return Array.from(set);
-  }
-
-  // Rendu grille chambres
-  function renderRooms(){
-    roomsGrid.innerHTML = '';
-    for(let i=1; i<=totalCases; i++){
-      const card = document.createElement('div');
-      if(i <= chambresCount){
-        card.className = 'room-card';
-        card.tabIndex = 0;
-        card.setAttribute('role','button');
-        card.setAttribute('aria-label', `Chambre ${i}`);
-        card.textContent = `Chambre ${i}`;
-        card.addEventListener('click', () => openRoom(i));
-        card.addEventListener('keypress', e => {
-          if(e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            openRoom(i);
-          }
-        });
-      } else {
-        card.className = 'room-card free';
-        card.textContent = "Libre";
-        card.setAttribute('aria-label', "Place libre");
-      }
-      roomsGrid.appendChild(card);
-    }
-  }
-
-  // Ouvrir panneau chambre avec profils assignés
-  function openRoom(chambreNum){
-    overlayTitle.textContent = `Chambre ${chambreNum}`;
-    teamCards.innerHTML = '';
-    const profIndices = assignments[chambreNum-1] || getRandomIndices(3, profiles.length);
-    profIndices.forEach(i => {
-      const p = profiles[i];
-      if(!p) return;
-      const card = document.createElement('article');
-      card.className = 'team-card';
-      card.innerHTML = `
-        <div class="team-photo"><img src="${p.photo || 'https://i.pravatar.cc/150?u=' + encodeURIComponent(p.name)}" alt="Photo de ${p.name}" loading="lazy"/></div>
-        <h3 class="team-name">${p.name}</h3>
-        <p class="team-role">${p.role}</p>
-        <p class="team-bio">${p.bio}</p>
-        <ul class="team-bullets">
-          ${p.bullets.map(b => `<li>${b}</li>`).join('')}
-        </ul>
-      `;
-      teamCards.appendChild(card);
-    });
-
-    profileOverlay.classList.add('active');
-    profileOverlay.focus();
-  }
-
-  function closeOverlay(overlay){
-    overlay.classList.remove('active');
-    overlay.setAttribute('aria-hidden', 'true');
-  }
-
-  function openOverlay(overlay){
-    overlay.classList.add('active');
-    overlay.setAttribute('aria-hidden', 'false');
-    overlay.focus();
-  }
-
-  closeProfileBtn.addEventListener('click', () => closeOverlay(profileOverlay));
-
-  // Gestion profils
-
-  function renderProfileList(){
-    profileList.innerHTML = '';
-    profiles.forEach((p, i) => {
-      const div = document.createElement('div');
-      div.className = 'profile-item';
-      div.innerHTML = `
-        <div class="profile-photo-small"><img src="${p.photo || 'https://i.pravatar.cc/150?u=' + encodeURIComponent(p.name)}" alt="Photo de ${p.name}" loading="lazy"></div>
-        <div class="profile-info">
-          <strong>${p.name}</strong><br />
-          <em>${p.role}</em><br />
-          <small>${p.bio}</small>
+    <!-- Modal User Profile -->
+    <div class="modal-overlay" id="userModal">
+        <div class="modal">
+            <h2 class="modal-title">Bienvenue</h2>
+            <div class="form-group">
+                <label>Votre Prénom</label>
+                <input type="text" id="userNameInput" placeholder="ex: Mattias">
+            </div>
+            <div style="display: flex; justify-content: flex-end;">
+                <button class="btn" onclick="app.saveUser()">Commencer</button>
+            </div>
         </div>
-        <div class="profile-actions">
-          <button type="button" aria-label="Modifier profil ${p.name}" data-index="${i}">Modifier</button>
-          <button type="button" aria-label="Supprimer profil ${p.name}" data-index="${i}">Supprimer</button>
-        </div>
-      `;
-      profileList.appendChild(div);
-    });
+    </div>
 
-    // Events boutons modifier/supprimer
-    profileList.querySelectorAll('button').forEach(btn => {
-      btn.addEventListener('click', e => {
-        const idx = parseInt(btn.getAttribute('data-index'), 10);
-        if(btn.textContent === 'Modifier'){
-          loadProfileForm(idx);
-        } else {
-          if(confirm(`Supprimer le profil de ${profiles[idx].name} ? Cela enlèvera aussi l’assignation à toutes les chambres.`)){
-            deleteProfile(idx);
-          }
-        }
-      });
-    });
-  }
+    <script>
+        const app = {
+            data: {
+                recipes: [],
+                shoppingList: [],
+                currentUser: ''
+            },
 
-  function loadProfileForm(idx){
-    const p = profiles[idx];
-    profileIndexInput.value = idx;
-    profileNameInput.value = p.name;
-    profileRoleInput.value = p.role;
-    profilePhotoInput.value = p.photo || '';
-    profileBioInput.value = p.bio;
-    profileBulletsInput.value = p.bullets.join('\n');
-  }
+            init() {
+                this.loadData();
+                this.checkUser();
+                this.render();
 
-  function clearProfileForm(){
-    profileIndexInput.value = '';
-    profileNameInput.value = '';
-    profileRoleInput.value = '';
-    profilePhotoInput.value = '';
-    profileBioInput.value = '';
-    profileBulletsInput.value = '';
-  }
+                // Event Listeners
+                document.getElementById('quickAddBtn').addEventListener('click', () => this.addQuickItem());
+                document.getElementById('quickAddInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.addQuickItem();
+                });
+                document.getElementById('shareBtn').addEventListener('click', () => this.shareList());
+            },
 
-  profileForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const idx = profileIndexInput.value;
-    const newProfile = {
-      name: profileNameInput.value.trim(),
-      role: profileRoleInput.value.trim(),
-      photo: profilePhotoInput.value.trim() || null,
-      bio: profileBioInput.value.trim(),
-      bullets: profileBulletsInput.value.trim().split('\n').map(b => b.trim()).filter(b => b)
-    };
-    if(idx === '') {
-      // Ajouter
-      profiles.push(newProfile);
-    } else {
-      // Modifier
-      profiles[idx] = newProfile;
-      // Vérifier assignations : supprimer indices dépassés ?
-      for(let i=0; i<assignments.length; i++){
-        assignments[i] = assignments[i].filter(a => a !== parseInt(idx));
-      }
-    }
-    clearProfileForm();
-    renderProfileList();
-    renderAssignForm();
-    alert('Profil enregistré.');
-  });
+            loadData() {
+                const savedRecipes = localStorage.getItem('recipes');
+                const savedList = localStorage.getItem('shoppingList');
+                const savedUser = localStorage.getItem('currentUser');
 
-  function deleteProfile(idx){
-    profiles.splice(idx,1);
-    // Mise à jour assignations : retirer ce profil
-    for(let i=0; i<assignments.length; i++){
-      assignments[i] = assignments[i].filter(a => a !== idx);
-      // Décrémenter les indices supérieurs à idx
-      assignments[i] = assignments[i].map(a => a > idx ? a-1 : a);
-    }
-    renderProfileList();
-    renderAssignForm();
-    alert('Profil supprimé.');
-  }
+                if (savedRecipes) this.data.recipes = JSON.parse(savedRecipes);
+                if (savedList) this.data.shoppingList = JSON.parse(savedList);
+                if (savedUser) this.data.currentUser = savedUser;
+            },
 
-  // Gestion assignation
+            checkUser() {
+                if (!this.data.currentUser) {
+                    document.getElementById('userModal').classList.add('open');
+                } else {
+                    document.querySelector('header h1').innerHTML = `Mes Courses <small style="font-size:0.9rem; font-weight:400; color:var(--text-muted); margin-left: 8px;">${this.data.currentUser}</small>`;
+                }
+            },
 
-  function renderAssignForm(){
-    assignList.innerHTML = '';
-    for(let i=1; i<=chambresCount; i++){
-      const div = document.createElement('div');
-      div.className = 'assign-chambre-item';
-      div.innerHTML = `
-        <label for="assignChambre${i}">Chambre ${i}</label>
-        <select id="assignChambre${i}" name="assignChambre${i}" class="multi-select" multiple size="5" aria-label="Assignation profils chambre ${i}">
-          ${profiles.map((p, idx) => {
-            const selected = assignments[i-1] && assignments[i-1].includes(idx) ? 'selected' : '';
-            return `<option value="${idx}" ${selected}>${p.name} (${p.role})</option>`;
-          }).join('')}
-        </select>
-      `;
-      assignList.appendChild(div);
-    }
-  }
+            saveUser() {
+                const name = document.getElementById('userNameInput').value.trim();
+                if (!name) return alert('Dites-moi votre nom !');
 
-  assignForm.addEventListener('submit', e => {
-    e.preventDefault();
-    for(let i=1; i<=chambresCount; i++){
-      const sel = document.getElementById(`assignChambre${i}`);
-      const selectedOptions = Array.from(sel.selectedOptions).map(opt => parseInt(opt.value, 10));
-      if(selectedOptions.length !== 3){
-        alert(`Veuillez sélectionner exactement 3 profils pour la chambre ${i}.`);
-        sel.focus();
-        return;
-      }
-      assignments[i-1] = selectedOptions;
-    }
-    alert('Assignation mise à jour.');
-    closeOverlay(assignManagerOverlay);
-  });
+                this.data.currentUser = name;
+                localStorage.setItem('currentUser', name);
+                document.getElementById('userModal').classList.remove('open');
+                this.checkUser();
+            },
 
-  // Ouverture/fermeture overlays
+            saveData() {
+                localStorage.setItem('recipes', JSON.stringify(this.data.recipes));
+                localStorage.setItem('shoppingList', JSON.stringify(this.data.shoppingList));
+                this.render();
+            },
 
-  btnManageProfiles.addEventListener('click', () => {
-    renderProfileList();
-    clearProfileForm();
-    openOverlay(profileManagerOverlay);
-  });
+            switchView(viewName) {
+                document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+                document.getElementById(`view-${viewName}`).classList.add('active');
 
-  profileManagerOverlay.querySelector('.close-btn').addEventListener('click', () => closeOverlay(profileManagerOverlay));
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                const navItems = document.querySelectorAll('.nav-item');
+                if (viewName === 'list') navItems[0].classList.add('active');
+                else navItems[1].classList.add('active');
 
-  btnManageAssign.addEventListener('click', () => {
-    if(profiles.length < 3){
-      alert("Vous devez avoir au moins 3 profils pour assigner aux chambres.");
-      return;
-    }
-    renderAssignForm();
-    openOverlay(assignManagerOverlay);
-  });
+                document.getElementById('addRecipeFab').style.display = viewName === 'recipes' ? 'flex' : 'none';
+            },
 
-  assignManagerOverlay.querySelector('.close-btn').addEventListener('click', () => closeOverlay(assignManagerOverlay));
+            // --- Shopping List Logic ---
 
-  // Panneau chambre fermé
-  window.addEventListener('keydown', e => {
-    if(e.key === 'Escape'){
-      if(profileOverlay.classList.contains('active')) closeOverlay(profileOverlay);
-      if(profileManagerOverlay.classList.contains('active')) closeOverlay(profileManagerOverlay);
-      if(assignManagerOverlay.classList.contains('active')) closeOverlay(assignManagerOverlay);
-    }
-  });
+            addQuickItem() {
+                const input = document.getElementById('quickAddInput');
+                const val = input.value.trim();
+                if (!val) return;
 
-  // Initial render
-  renderRooms();
+                this.data.shoppingList.unshift({
+                    id: Date.now(),
+                    name: val,
+                    checked: false,
+                    timestamp: Date.now(),
+                    addedBy: this.data.currentUser
+                });
+                input.value = '';
+                this.saveData();
+            },
 
-</script>
+            toggleItem(id) {
+                const item = this.data.shoppingList.find(i => i.id === id);
+                if (item) {
+                    item.checked = !item.checked;
+                    this.data.shoppingList.sort((a, b) => a.checked - b.checked);
+                    this.saveData();
+                }
+            },
 
+            deleteItem(id) {
+                this.data.shoppingList = this.data.shoppingList.filter(i => i.id !== id);
+                this.saveData();
+            },
+
+            clearList() {
+                if (confirm('Voulez-vous vraiment vider la liste ?')) {
+                    this.data.shoppingList = [];
+                    this.saveData();
+                }
+            },
+
+            addRecipeToList(recipeId) {
+                const recipe = this.data.recipes.find(r => r.id === recipeId);
+                if (!recipe) return;
+
+                recipe.ingredients.forEach(ing => {
+                    this.data.shoppingList.unshift({
+                        id: Date.now() + Math.random(),
+                        name: ing,
+                        checked: false,
+                        timestamp: Date.now(),
+                        addedBy: this.data.currentUser
+                    });
+                });
+
+                this.saveData();
+                this.switchView('list');
+                alert(`Ingrédients de "${recipe.name}" ajoutés !`);
+            },
+
+            shareList() {
+                const items = this.data.shoppingList.filter(i => !i.checked).map(i => `- ${i.name}`).join('\n');
+                if (!items) return alert('La liste est vide !');
+
+                const text = `🛒 Ma Liste de Courses (${this.data.currentUser}) :\n\n${items}`;
+
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Liste copiée !');
+                }).catch(err => {
+                    alert('Voici la liste :\n\n' + text);
+                });
+            },
+
+            // --- Recipe Logic ---
+
+            openModal() { document.getElementById('recipeModal').classList.add('open'); },
+            closeModal() {
+                document.getElementById('recipeModal').classList.remove('open');
+                document.getElementById('recipeName').value = '';
+                document.getElementById('recipeIngredients').value = '';
+            },
+
+            saveRecipe() {
+                const name = document.getElementById('recipeName').value.trim();
+                const ingText = document.getElementById('recipeIngredients').value.trim();
+
+                if (!name || !ingText) return alert('Veuillez remplir tous les champs');
+
+                const ingredients = ingText.split('\n').map(l => l.trim()).filter(l => l);
+
+                this.data.recipes.push({
+                    id: Date.now(),
+                    name,
+                    ingredients
+                });
+
+                this.closeModal();
+                this.saveData();
+            },
+
+            deleteRecipe(id) {
+                if (confirm('Supprimer cette recette ?')) {
+                    this.data.recipes = this.data.recipes.filter(r => r.id !== id);
+                    this.saveData();
+                }
+            },
+
+            // --- Rendering ---
+
+            render() {
+                this.renderList();
+                this.renderRecipes();
+            },
+
+            renderList() {
+                const container = document.getElementById('shoppingListContainer');
+                container.innerHTML = '';
+
+                if (this.data.shoppingList.length === 0) {
+                    container.innerHTML = '<div class="empty-state">Votre liste est vide 🎉</div>';
+                    return;
+                }
+
+                this.data.shoppingList.forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = `shopping-item ${item.checked ? 'checked' : ''}`;
+                    el.onclick = (e) => {
+                        if (e.target.closest('.delete-btn')) return;
+                        this.toggleItem(item.id);
+                    };
+
+                    // Format time & User
+                    let infoString = '';
+                    if (item.timestamp) {
+                        const date = new Date(item.timestamp);
+                        const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        infoString = `${time}`;
+                    }
+                    if (item.addedBy) {
+                        infoString += ` • ${item.addedBy}`;
+                    }
+
+                    el.innerHTML = `
+                        <div class="checkbox"></div>
+                        <div style="flex:1">
+                            <div class="item-name">${item.name}</div>
+                            ${infoString ? `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">${infoString}</div>` : ''}
+                        </div>
+                        <button class="btn btn-sm delete-btn" style="background:transparent; color:var(--text-muted); padding:4px 8px;" onclick="app.deleteItem(${item.id})">×</button>
+                    `;
+                    container.appendChild(el);
+                });
+            },
+
+            renderRecipes() {
+                const container = document.getElementById('recipesContainer');
+                container.innerHTML = '';
+
+                if (this.data.recipes.length === 0) {
+                    document.getElementById('noRecipesMsg').style.display = 'block';
+                    return;
+                }
+                document.getElementById('noRecipesMsg').style.display = 'none';
+
+                this.data.recipes.forEach(recipe => {
+                    const el = document.createElement('div');
+                    el.className = 'card';
+                    el.innerHTML = `
+                        <div class="recipe-header">
+                            <h3 class="recipe-title">${recipe.name}</h3>
+                            <button class="btn btn-sm btn-icon" onclick="app.deleteRecipe(${recipe.id})">🗑️</button>
+                        </div>
+                        <p class="recipe-ingredients">${recipe.ingredients.length} ingrédients</p>
+                        <button class="btn btn-outline btn-sm" style="width:100%" onclick="app.addRecipeToList(${recipe.id})">
+                            + Ajouter à la liste
+                        </button>
+                    `;
+                    container.appendChild(el);
+                });
+            }
+        };
+
+        // Start App
+        document.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
 </body>
+
 </html>
