@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mes Courses</title>
+    <title>Mes Courses (Cloud)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
@@ -530,10 +530,31 @@
             margin-top: 60px;
             font-size: 1.1rem;
         }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            color: var(--primary);
+            font-weight: bold;
+            transition: opacity 0.5s;
+        }
     </style>
 </head>
 
 <body>
+
+    <div class="loading-overlay" id="loadingScreen">
+        Chargement... 🌿
+    </div>
 
     <header>
         <h1>Mes Courses</h1>
@@ -622,8 +643,23 @@
         </div>
     </div>
 
-    <script>
-        const app = {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCMRHPCIY8DNGpJsJ9ZkEnpZ6tEpNrPnbQ",
+            authDomain: "course-c5bb8.firebaseapp.com",
+            projectId: "course-c5bb8",
+            storageBucket: "course-c5bb8.firebasestorage.app",
+            messagingSenderId: "798135517236",
+            appId: "1:798135517236:web:b0bf81300e179a7239ca61"
+        };
+
+        const firebaseApp = initializeApp(firebaseConfig);
+        const db = getFirestore(firebaseApp);
+
+        window.app = {
             data: {
                 recipes: [],
                 shoppingList: [],
@@ -631,15 +667,11 @@
             },
 
             init() {
-                this.loadData();
                 this.checkUser();
 
-                // Seed Example Recipe if empty
-                if (this.data.recipes.length === 0) {
-                    this.seedExampleRecipe();
-                }
-
-                this.render();
+                // Realtime Listeners
+                this.subscribeToList();
+                this.subscribeToRecipes();
 
                 // Event Listeners
                 document.getElementById('quickAddBtn').addEventListener('click', () => this.addQuickItem());
@@ -649,37 +681,13 @@
                 document.getElementById('shareBtn').addEventListener('click', () => this.shareList());
             },
 
-            seedExampleRecipe() {
-                this.data.recipes.push({
-                    id: Date.now(),
-                    name: "Salade César",
-                    servings: 2,
-                    ingredients: [
-                        "1 Laitue Romaine",
-                        "200g Poulet",
-                        "50g Parmesan",
-                        "40g Croûtons",
-                        "1 Sauce César"
-                    ]
-                });
-                this.saveData();
-            },
-
-            loadData() {
-                const savedRecipes = localStorage.getItem('recipes');
-                const savedList = localStorage.getItem('shoppingList');
-                const savedUser = localStorage.getItem('currentUser');
-
-                if (savedRecipes) this.data.recipes = JSON.parse(savedRecipes);
-                if (savedList) this.data.shoppingList = JSON.parse(savedList);
-                if (savedUser) this.data.currentUser = savedUser;
-            },
-
             checkUser() {
-                if (!this.data.currentUser) {
-                    document.getElementById('userModal').classList.add('open');
-                } else {
+                const savedUser = localStorage.getItem('currentUser');
+                if (savedUser) {
+                    this.data.currentUser = savedUser;
                     document.querySelector('header h1').innerHTML = `Mes Courses <small style="font-size:0.9rem; font-weight:400; color:var(--text-muted); margin-left: 8px;">${this.data.currentUser}</small>`;
+                } else {
+                    document.getElementById('userModal').classList.add('open');
                 }
             },
 
@@ -693,28 +701,28 @@
                 this.checkUser();
             },
 
-            saveData() {
-                localStorage.setItem('recipes', JSON.stringify(this.data.recipes));
-                localStorage.setItem('shoppingList', JSON.stringify(this.data.shoppingList));
-                this.render();
+            // --- Firebase Subscriptions ---
+
+            subscribeToList() {
+                const q = query(collection(db, "shoppingList"), orderBy("timestamp", "desc"));
+                onSnapshot(q, (snapshot) => {
+                    this.data.shoppingList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    this.renderList();
+                    document.getElementById('loadingScreen').style.opacity = 0;
+                    setTimeout(() => document.getElementById('loadingScreen').style.display = 'none', 500);
+                });
             },
 
-            switchView(viewName) {
-                document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-                document.getElementById(`view-${viewName}`).classList.add('active');
-
-                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-                const navItems = document.querySelectorAll('.nav-item');
-                if (viewName === 'list') navItems[0].classList.add('active');
-                else navItems[1].classList.add('active');
-
-                document.getElementById('addRecipeFab').style.display = viewName === 'recipes' ? 'flex' : 'none';
+            subscribeToRecipes() {
+                const q = query(collection(db, "recipes"), orderBy("name"));
+                onSnapshot(q, (snapshot) => {
+                    this.data.recipes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    this.renderRecipes();
+                });
             },
 
             // --- Helper: Ingredient Parsing ---
             parseIngredient(str) {
-                // Try to match number at start: "200g Lardons" -> qty: 200, unit: "g", name: "Lardons"
-                // Or "2 Laitue" -> qty: 2, unit: "", name: "Laitue"
                 const match = str.match(/^(\d+(?:[\.,]\d+)?)\s*(\w*)\s+(.*)$/);
                 if (match) {
                     return {
@@ -729,7 +737,7 @@
 
             // --- Shopping List Logic ---
 
-            addQuickItem() {
+            async addQuickItem() {
                 const input = document.getElementById('quickAddInput');
                 const qtyInput = document.getElementById('quickAddQty');
 
@@ -747,49 +755,55 @@
 
                 const fullName = qty ? `${qty} ${name}` : name;
 
-                this.data.shoppingList.unshift({
-                    id: Date.now(),
-                    name: fullName,
-                    checked: false,
-                    timestamp: Date.now(),
-                    addedBy: this.data.currentUser
-                });
-
-                input.value = '';
-                qtyInput.value = '';
-                this.saveData();
-            },
-
-            toggleItem(id) {
-                const item = this.data.shoppingList.find(i => i.id === id);
-                if (item) {
-                    item.checked = !item.checked;
-                    this.data.shoppingList.sort((a, b) => a.checked - b.checked);
-                    this.saveData();
+                try {
+                    await addDoc(collection(db, "shoppingList"), {
+                        name: fullName,
+                        checked: false,
+                        timestamp: Date.now(),
+                        addedBy: this.data.currentUser
+                    });
+                    input.value = '';
+                    qtyInput.value = '';
+                } catch (e) {
+                    console.error("Error adding document: ", e);
+                    alert("Erreur lors de l'ajout. Vérifiez votre connexion.");
                 }
             },
 
-            deleteItem(id) {
-                this.data.shoppingList = this.data.shoppingList.filter(i => i.id !== id);
-                this.saveData();
+            async toggleItem(id) {
+                const item = this.data.shoppingList.find(i => i.id === id);
+                if (item) {
+                    await updateDoc(doc(db, "shoppingList", id), {
+                        checked: !item.checked
+                    });
+                }
             },
 
-            clearList() {
+            async deleteItem(id) {
+                await deleteDoc(doc(db, "shoppingList", id));
+            },
+
+            async clearList() {
                 if (confirm('Voulez-vous vraiment vider la liste ?')) {
-                    this.data.shoppingList = [];
-                    this.saveData();
+                    const batch = writeBatch(db);
+                    this.data.shoppingList.forEach(item => {
+                        batch.delete(doc(db, "shoppingList", item.id));
+                    });
+                    await batch.commit();
                 }
             },
 
             // --- Recipe Logic ---
 
-            addRecipeToList(recipeId, currentServings) {
+            async addRecipeToList(recipeId, currentServings) {
                 const recipe = this.data.recipes.find(r => r.id === recipeId);
                 if (!recipe) return;
 
                 const ratio = currentServings / (recipe.servings || 1);
                 let addedCount = 0;
                 let duplicateCount = 0;
+
+                const batch = writeBatch(db);
 
                 recipe.ingredients.forEach(ingStr => {
                     const parsed = this.parseIngredient(ingStr);
@@ -803,17 +817,15 @@
                         // Scale Quantity
                         let finalName = parsed.original;
                         if (!parsed.noQty) {
-                            const newQty = Math.round((parsed.qty * ratio) * 10) / 10; // Round to 1 decimal
+                            const newQty = Math.round((parsed.qty * ratio) * 10) / 10;
                             finalName = `${newQty}${parsed.unit} ${parsed.name}`;
                         } else if (ratio > 1) {
-                            // If no qty but scaling up, maybe just add (x2)? No, keep simple.
-                            // Or assume 1 and scale?
                             const newQty = Math.round((1 * ratio) * 10) / 10;
                             finalName = `${newQty} ${parsed.name}`;
                         }
 
-                        this.data.shoppingList.unshift({
-                            id: Date.now() + Math.random(),
+                        const newRef = doc(collection(db, "shoppingList"));
+                        batch.set(newRef, {
                             name: finalName,
                             checked: false,
                             timestamp: Date.now(),
@@ -823,12 +835,15 @@
                     }
                 });
 
-                this.saveData();
-                this.switchView('list');
-
-                let msg = `${addedCount} ingrédients ajoutés.`;
-                if (duplicateCount > 0) msg += `\n(${duplicateCount} ignorés car déjà présents)`;
-                alert(msg);
+                if (addedCount > 0) {
+                    await batch.commit();
+                    this.switchView('list');
+                    let msg = `${addedCount} ingrédients ajoutés.`;
+                    if (duplicateCount > 0) msg += `\n(${duplicateCount} ignorés car déjà présents)`;
+                    alert(msg);
+                } else {
+                    alert("Tous les ingrédients sont déjà dans la liste !");
+                }
             },
 
             openModal() { document.getElementById('recipeModal').classList.add('open'); },
@@ -839,7 +854,7 @@
                 document.getElementById('recipeServings').value = 2;
             },
 
-            saveRecipe() {
+            async saveRecipe() {
                 const name = document.getElementById('recipeName').value.trim();
                 const ingText = document.getElementById('recipeIngredients').value.trim();
                 const servings = parseInt(document.getElementById('recipeServings').value) || 2;
@@ -848,21 +863,18 @@
 
                 const ingredients = ingText.split('\n').map(l => l.trim()).filter(l => l);
 
-                this.data.recipes.push({
-                    id: Date.now(),
+                await addDoc(collection(db, "recipes"), {
                     name,
                     servings,
                     ingredients
                 });
 
                 this.closeModal();
-                this.saveData();
             },
 
-            deleteRecipe(id) {
+            async deleteRecipe(id) {
                 if (confirm('Supprimer cette recette ?')) {
-                    this.data.recipes = this.data.recipes.filter(r => r.id !== id);
-                    this.saveData();
+                    await deleteDoc(doc(db, "recipes", id));
                 }
             },
 
@@ -884,7 +896,7 @@
                             const newQty = Math.round((parsed.qty * ratio) * 10) / 10;
                             return `${newQty}${parsed.unit} ${parsed.name}`;
                         }
-                        return ing; // Cannot scale no-qty items easily without assuming 1
+                        return ing;
                     }).join(', ');
                 }
             },
@@ -903,10 +915,18 @@
             },
 
             // --- Rendering ---
+            // (Same as before, but called by listeners)
 
-            render() {
-                this.renderList();
-                this.renderRecipes();
+            switchView(viewName) {
+                document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+                document.getElementById(`view-${viewName}`).classList.add('active');
+
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                const navItems = document.querySelectorAll('.nav-item');
+                if (viewName === 'list') navItems[0].classList.add('active');
+                else navItems[1].classList.add('active');
+
+                document.getElementById('addRecipeFab').style.display = viewName === 'recipes' ? 'flex' : 'none';
             },
 
             renderList() {
@@ -943,7 +963,7 @@
                             <div class="item-name">${item.name}</div>
                             ${infoString ? `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">${infoString}</div>` : ''}
                         </div>
-                        <button class="btn btn-sm delete-btn" style="background:transparent; color:var(--text-muted); padding:4px 8px;" onclick="app.deleteItem(${item.id})">×</button>
+                        <button class="btn btn-sm delete-btn" style="background:transparent; color:var(--text-muted); padding:4px 8px;" onclick="app.deleteItem('${item.id}')">×</button>
                     `;
                     container.appendChild(el);
                 });
@@ -962,20 +982,20 @@
                 this.data.recipes.forEach(recipe => {
                     const el = document.createElement('div');
                     el.className = 'card';
-                    const baseServings = recipe.servings || 2; // Default to 2 if missing
+                    const baseServings = recipe.servings || 2;
 
                     el.innerHTML = `
                         <div class="recipe-header">
                             <h3 class="recipe-title">${recipe.name}</h3>
-                            <button class="btn btn-sm btn-icon" onclick="app.deleteRecipe(${recipe.id})">🗑️</button>
+                            <button class="btn btn-sm btn-icon" onclick="app.deleteRecipe('${recipe.id}')">🗑️</button>
                         </div>
                         
                         <div class="recipe-meta">
                             <span>Pour</span>
                             <div class="servings-control">
-                                <button class="servings-btn" onclick="app.updateRecipeServingsDisplay(${recipe.id}, -1)">-</button>
+                                <button class="servings-btn" onclick="app.updateRecipeServingsDisplay('${recipe.id}', -1)">-</button>
                                 <span id="servings-${recipe.id}" style="font-weight:600; min-width:16px; text-align:center;">${baseServings}</span>
-                                <button class="servings-btn" onclick="app.updateRecipeServingsDisplay(${recipe.id}, 1)">+</button>
+                                <button class="servings-btn" onclick="app.updateRecipeServingsDisplay('${recipe.id}', 1)">+</button>
                             </div>
                             <span>personnes</span>
                         </div>
@@ -985,7 +1005,7 @@
                         </p>
                         
                         <button class="btn btn-outline btn-sm" style="width:100%" 
-                            onclick="app.addRecipeToList(${recipe.id}, parseInt(document.getElementById('servings-${recipe.id}').innerText))">
+                            onclick="app.addRecipeToList('${recipe.id}', parseInt(document.getElementById('servings-${recipe.id}').innerText))">
                             + Ajouter à la liste
                         </button>
                     `;
@@ -995,7 +1015,7 @@
         };
 
         // Start App
-        document.addEventListener('DOMContentLoaded', () => app.init());
+        app.init();
     </script>
 </body>
 
